@@ -467,7 +467,87 @@
             .teto-grid { grid-template-columns: 1fr; }
             body { padding: 12px; }
             #alertasContainer { max-width: 90vw; right: 10px; }
+            .comp-cat-grid { grid-template-columns: 1fr !important; }
         }
+
+        /* ====== COMPARATIVOS ====== */
+        .comp-cat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 12px;
+            margin-top: 4px;
+        }
+        .comp-cat-card {
+            background: var(--gray-50);
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            position: relative;
+            transition: box-shadow 0.2s;
+        }
+        .comp-cat-card:hover { box-shadow: var(--shadow); }
+        .comp-cat-card.rank-1 { border-color: #fbbf24; background: #fffbeb; }
+        .comp-cat-card.rank-2 { border-color: #cbd5e1; background: #f8fafc; }
+        .comp-cat-card.rank-3 { border-color: #f97316; background: #fff7ed; }
+        .comp-rank-badge {
+            position: absolute; top: 10px; right: 12px;
+            font-size: 16px; line-height: 1;
+        }
+        .comp-cat-name { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 4px; }
+        .comp-cat-value { font-size: 20px; font-weight: 800; color: var(--primary); letter-spacing: -0.5px; margin-bottom: 4px; }
+        .comp-cat-pct { font-size: 11.5px; color: var(--gray-400); font-weight: 600; }
+        .comp-cat-bar { height: 6px; background: var(--gray-200); border-radius: 20px; overflow: hidden; margin-top: 8px; }
+        .comp-cat-bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--primary), var(--secondary)); }
+
+        /* Comparison row table */
+        .comp-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        .comp-table th {
+            text-align: left; padding: 8px 12px;
+            background: var(--gray-50); color: var(--gray-500);
+            font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.4px;
+            border-bottom: 2px solid var(--gray-200);
+        }
+        .comp-table td { padding: 10px 12px; border-bottom: 1px solid var(--gray-100); color: var(--gray-700); vertical-align: middle; }
+        .comp-table tr:last-child td { border-bottom: none; }
+        .comp-table tr:hover td { background: var(--gray-50); }
+        .comp-diff-pos { color: var(--success); font-weight: 700; }
+        .comp-diff-neg { color: var(--danger); font-weight: 700; }
+        .comp-diff-zero { color: var(--gray-400); font-weight: 600; }
+        .comp-indicator { font-size: 16px; }
+
+        /* Destaque cards */
+        .destaque-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; margin-top: 4px; }
+        .destaque-card {
+            border-radius: var(--radius); padding: 16px;
+            border-left: 4px solid transparent;
+        }
+        .destaque-card.d-principal { background: #eff6ff; border-left-color: #3b82f6; }
+        .destaque-card.d-crescimento { background: #f0fff4; border-left-color: var(--success); }
+        .destaque-card.d-queda { background: #fff5f5; border-left-color: var(--danger); }
+        .destaque-card.d-estavel { background: #f0fdf4; border-left-color: #86efac; }
+        .destaque-icon { font-size: 24px; margin-bottom: 6px; }
+        .destaque-label { font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 4px; }
+        .destaque-title { font-size: 15px; font-weight: 800; color: var(--gray-900); margin-bottom: 4px; }
+        .destaque-desc { font-size: 12.5px; color: var(--gray-500); line-height: 1.5; }
+
+        /* Media cards */
+        .media-card {
+            display: flex; align-items: center; gap: 14px;
+            background: var(--gray-50); border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius); padding: 14px 16px; margin-bottom: 10px;
+        }
+        .media-icon { font-size: 22px; flex-shrink: 0; }
+        .media-body { flex: 1; }
+        .media-cat { font-size: 13px; font-weight: 700; color: var(--gray-900); margin-bottom: 2px; }
+        .media-values { display: flex; gap: 20px; flex-wrap: wrap; }
+        .media-val-item { }
+        .media-val-label { font-size: 10px; color: var(--gray-400); font-weight: 700; text-transform: uppercase; letter-spacing: 0.3px; }
+        .media-val-value { font-size: 14px; font-weight: 700; color: var(--gray-900); }
+        .media-insight { font-size: 12px; color: var(--gray-500); margin-top: 4px; font-style: italic; }
+        .media-badge { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 20px; }
+        .media-badge.above { background: #d1fae5; color: #065f46; }
+        .media-badge.below { background: #fee2e2; color: #7f1d1d; }
+        .media-badge.equal { background: var(--gray-100); color: var(--gray-500); }
     </style>
 </head>
 <body>
@@ -482,6 +562,7 @@
             <button class="nav-btn" data-section="cartoes">💳 Cartões</button>
             <button class="nav-btn" data-section="metas">🎯 Metas</button>
             <button class="nav-btn" data-section="relatorios">📋 Relatórios</button>
+            <button class="nav-btn" data-section="comparativos">📈 Comparativos</button>
             <button class="nav-btn" data-section="backup">💾 Backup</button>
         </div>
     </header>
@@ -563,6 +644,7 @@
                             <option value="vivamais">Viva Mais</option>
                             <option value="bayeux">Dore Bayeux</option>
                             <option value="topvida">Top Vida</option>
+                            <option value="outro">Prestação de Serviço Avulsa</option>
                             <option value="outro">Outro</option>
                         </select>
                     </div>
@@ -1048,6 +1130,43 @@
             </div>
         </div>
     </section>
+    <!-- COMPARATIVOS -->
+    <section id="comparativos" class="section">
+        <!-- Month selector -->
+        <div class="card" style="margin-bottom:18px;padding:14px 22px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+                <span style="font-weight:700;font-size:14px;color:var(--gray-900);">📈 Comparativos por Categoria de Receita</span>
+                <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+                    <label style="font-size:12px;color:var(--gray-500);text-transform:none;letter-spacing:0;font-weight:600;">Mês de referência:</label>
+                    <input type="month" id="mesComparativo" style="width:160px;" onchange="app.renderComparativos()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 6: Receita por Categoria - Mês Atual -->
+        <div class="card" style="margin-bottom:18px;">
+            <h2>6️⃣ Receita por Categoria — Mês de Referência</h2>
+            <div id="compCatMesAtual"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <!-- Section 7: Mês Atual x Mês Anterior por Categoria -->
+        <div class="card" style="margin-bottom:18px;">
+            <h2>7️⃣ Mês de Referência × Mês Anterior por Categoria</h2>
+            <div id="compCatMesXMes"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <!-- Section 8: Destaques automáticos -->
+        <div class="card" style="margin-bottom:18px;">
+            <h2>8️⃣ Comparativo entre Categorias — Destaques</h2>
+            <div id="compDestaques"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <!-- Section 9: Média histórica por categoria -->
+        <div class="card" style="margin-bottom:18px;">
+            <h2>9️⃣ Receita Média Histórica por Categoria</h2>
+            <div id="compMediaHist"><div class="empty-state">Sem dados</div></div>
+        </div>
+    </section>
 </div>
 
 <script>
@@ -1089,6 +1208,8 @@ const app = {
         const mesAtualStr = agora.toISOString().slice(0,7);
         const meTetoEl = document.getElementById('mesTeto');
         if (meTetoEl) meTetoEl.value = mesAtualStr;
+        const mesCompEl = document.getElementById('mesComparativo');
+        if (mesCompEl) mesCompEl.value = mesAtualStr;
         this.renderTetoCards();
         this.verificarAlertasTeto();
     },
@@ -1209,6 +1330,7 @@ const app = {
         if (id === 'cartoes') this.atualizarTudoCartao();
         if (id === 'dashboard') this.atualizarDashboard();
         if (id === 'metas') { this.listarMetas(); this.renderTetoCards(); this.renderCentralAlertas(); }
+        if (id === 'comparativos') this.renderComparativos();
     },
 
     mudarSubSecao(id, btn) {
@@ -2502,6 +2624,313 @@ const app = {
 
     arredondarMoeda(valor) {
         return Math.round(valor * 100) / 100;
+    },
+
+    // ====================== COMPARATIVOS ======================
+
+    // Receita categories as used in the app
+    _CATS_RECEITA: ['freelance', 'consultoria', 'venda', 'prestacao', 'outro'],
+    _CATS_RECEITA_LABEL: {
+        freelance: 'Freelance', consultoria: 'Consultoria',
+        venda: 'Venda de Produto', prestacao: 'Prestação de Serviço', outro: 'Outro'
+    },
+    _CATS_RECEITA_EMOJI: {
+        freelance: '💼', consultoria: '🧠', venda: '🛒', prestacao: '⚙️', outro: '📦'
+    },
+
+    // Sum received receitas for a category in a given month/year
+    _somaReceitaCatMes(cat, mes, ano) {
+        return this.dados.receitas
+            .filter(r => {
+                if (r.status !== 'recebido') return false;
+                const d = new Date(r.data + 'T00:00:00');
+                return r.categoria === cat && d.getMonth() === mes && d.getFullYear() === ano;
+            })
+            .reduce((s, r) => s + r.valor, 0);
+    },
+
+    // Get all months that have any receita, returns [{mes,ano}] sorted asc
+    _mesesComReceita() {
+        const set = new Set();
+        this.dados.receitas.forEach(r => {
+            const d = new Date(r.data + 'T00:00:00');
+            set.add(`${d.getFullYear()}-${d.getMonth()}`);
+        });
+        return [...set].map(s => { const [a, m] = s.split('-'); return {ano: +a, mes: +m}; })
+            .sort((a, b) => a.ano !== b.ano ? a.ano - b.ano : a.mes - b.mes);
+    },
+
+    renderComparativos() {
+        const el = document.getElementById('mesComparativo');
+        const hoje = new Date();
+        let mes = hoje.getMonth(), ano = hoje.getFullYear();
+        if (el && el.value) {
+            const [aStr, mStr] = el.value.split('-');
+            ano = +aStr; mes = +mStr - 1;
+        }
+
+        // Prev month
+        let mesPrev = mes - 1, anoPrev = ano;
+        if (mesPrev < 0) { mesPrev = 11; anoPrev--; }
+
+        const cats = this._CATS_RECEITA;
+        const label = c => this._CATS_RECEITA_LABEL[c] || c;
+        const emoji = c => this._CATS_RECEITA_EMOJI[c] || '📦';
+        const fmt = v => this.formatarMoeda(v);
+
+        // --- Compute data for all categories ---
+        const dadosAtual = cats.map(c => ({ cat: c, valor: this._somaReceitaCatMes(c, mes, ano) }));
+        const dadosPrev  = cats.map(c => ({ cat: c, valor: this._somaReceitaCatMes(c, mesPrev, anoPrev) }));
+        const totalAtual = dadosAtual.reduce((s, d) => s + d.valor, 0);
+        const totalPrev  = dadosPrev.reduce((s, d) => s + d.valor, 0);
+
+        // Sort by value desc for ranking
+        const ranked = [...dadosAtual].sort((a, b) => b.valor - a.valor);
+        const maxValor = ranked[0]?.valor || 0;
+        const rankMap = {};
+        ranked.forEach((r, i) => { rankMap[r.cat] = i + 1; });
+
+        const mesLabel = (m, a) => new Date(a, m, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+        // ============================================================
+        // SECTION 6: Receita por Categoria - Mês Atual
+        // ============================================================
+        const sec6 = document.getElementById('compCatMesAtual');
+        if (!sec6) return;
+
+        if (totalAtual === 0 && dadosAtual.every(d => d.valor === 0)) {
+            sec6.innerHTML = `<div class="empty-state">Sem receitas registradas em ${mesLabel(mes, ano)}</div>`;
+        } else {
+            const rankEmojis = ['🥇', '🥈', '🥉'];
+            sec6.innerHTML = `
+            <div style="margin-bottom:12px;font-size:13px;color:var(--gray-500);">
+                Total recebido em <strong style="color:var(--gray-900);">${mesLabel(mes, ano)}</strong>: 
+                <strong style="color:var(--primary);">R$ ${fmt(totalAtual)}</strong>
+            </div>
+            <div class="comp-cat-grid">
+                ${ranked.map((d, i) => {
+                    const pct = totalAtual > 0 ? (d.valor / totalAtual * 100) : 0;
+                    const barPct = maxValor > 0 ? (d.valor / maxValor * 100) : 0;
+                    const rankCls = i < 3 ? `rank-${i+1}` : '';
+                    return `<div class="comp-cat-card ${rankCls}">
+                        ${i < 3 ? `<div class="comp-rank-badge">${rankEmojis[i]}</div>` : ''}
+                        <div class="comp-cat-name">${emoji(d.cat)} ${label(d.cat)}</div>
+                        <div class="comp-cat-value">R$ ${fmt(d.valor)}</div>
+                        <div class="comp-cat-pct">${pct.toFixed(1)}% do total · #${rankMap[d.cat]} no ranking</div>
+                        <div class="comp-cat-bar"><div class="comp-cat-bar-fill" style="width:${barPct.toFixed(1)}%"></div></div>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
+
+        // ============================================================
+        // SECTION 7: Mês Atual x Mês Anterior
+        // ============================================================
+        const sec7 = document.getElementById('compCatMesXMes');
+        const mesAtualLabel = mesLabel(mes, ano);
+        const mesPrevLabel  = mesLabel(mesPrev, anoPrev);
+
+        const rows7 = cats.map(c => {
+            const atual = dadosAtual.find(d => d.cat === c)?.valor || 0;
+            const prev  = dadosPrev.find(d => d.cat === c)?.valor || 0;
+            const diff  = atual - prev;
+            const diffPct = prev > 0 ? (diff / prev * 100) : (atual > 0 ? 100 : 0);
+            let indicator, diffCls;
+            if (Math.abs(diff) < 0.01)      { indicator = '➡️'; diffCls = 'comp-diff-zero'; }
+            else if (diff > 0)               { indicator = '📈'; diffCls = 'comp-diff-pos'; }
+            else                             { indicator = '📉'; diffCls = 'comp-diff-neg'; }
+            return { c, atual, prev, diff, diffPct, indicator, diffCls };
+        });
+
+        sec7.innerHTML = `
+        <div style="overflow-x:auto;">
+        <table class="comp-table">
+            <thead><tr>
+                <th>Categoria</th>
+                <th>${mesAtualLabel}</th>
+                <th>${mesPrevLabel}</th>
+                <th>Diferença (R$)</th>
+                <th>Variação</th>
+                <th></th>
+            </tr></thead>
+            <tbody>
+            ${rows7.map(r => `<tr>
+                <td><strong>${emoji(r.c)} ${label(r.c)}</strong></td>
+                <td>R$ ${fmt(r.atual)}</td>
+                <td>R$ ${fmt(r.prev)}</td>
+                <td class="${r.diffCls}">${r.diff >= 0 ? '+' : ''}R$ ${fmt(Math.abs(r.diff))}</td>
+                <td class="${r.diffCls}">${r.prev > 0 || r.atual > 0 ? (r.diffPct >= 0 ? '+' : '') + r.diffPct.toFixed(1) + '%' : '—'}</td>
+                <td class="comp-indicator">${r.indicator}</td>
+            </tr>`).join('')}
+            <tr style="background:var(--primary-light);font-weight:700;">
+                <td><strong>Total</strong></td>
+                <td><strong>R$ ${fmt(totalAtual)}</strong></td>
+                <td><strong>R$ ${fmt(totalPrev)}</strong></td>
+                <td class="${totalAtual >= totalPrev ? 'comp-diff-pos' : 'comp-diff-neg'}">
+                    ${totalAtual >= totalPrev ? '+' : ''}R$ ${fmt(Math.abs(totalAtual - totalPrev))}
+                </td>
+                <td class="${totalAtual >= totalPrev ? 'comp-diff-pos' : 'comp-diff-neg'}">
+                    ${totalPrev > 0 ? (((totalAtual - totalPrev) / totalPrev) * 100).toFixed(1) + '%' : '—'}
+                </td>
+                <td>${totalAtual >= totalPrev ? '📈' : '📉'}</td>
+            </tr>
+            </tbody>
+        </table>
+        </div>`;
+
+        // ============================================================
+        // SECTION 8: Destaques automáticos
+        // ============================================================
+        const sec8 = document.getElementById('compDestaques');
+        const comDados = dadosAtual.filter(d => d.valor > 0);
+        const comDadosPrev = dadosPrev.filter(d => d.valor > 0);
+
+        if (comDados.length === 0) {
+            sec8.innerHTML = `<div class="empty-state">Sem receitas em ${mesAtualLabel} para gerar destaques</div>`;
+        } else {
+            const principal = ranked[0];
+            // Crescimento: maior diff positiva entre cats com dados no mês atual
+            const crescRows = rows7.filter(r => r.diff > 0).sort((a, b) => b.diff - a.diff);
+            const quedaRows = rows7.filter(r => r.diff < 0).sort((a, b) => a.diff - b.diff);
+            const estavelRows = rows7.filter(r => Math.abs(r.diff) < 0.01 && r.atual > 0);
+
+            const destaques = [];
+
+            // Principal fonte
+            destaques.push(`
+            <div class="destaque-card d-principal">
+                <div class="destaque-icon">👑</div>
+                <div class="destaque-label">Principal Fonte de Receita</div>
+                <div class="destaque-title">${emoji(principal.cat)} ${label(principal.cat)}</div>
+                <div class="destaque-desc">
+                    Responsável por <strong>R$ ${fmt(principal.valor)}</strong> 
+                    (${totalAtual > 0 ? (principal.valor / totalAtual * 100).toFixed(1) : 0}% do total) em ${mesAtualLabel}.
+                    ${totalPrev > 0 ? ` A categoria ${label(principal.cat)} continua sendo a principal fonte de receita.` : ''}
+                </div>
+            </div>`);
+
+            // Maior crescimento
+            if (crescRows.length > 0) {
+                const top = crescRows[0];
+                destaques.push(`
+                <div class="destaque-card d-crescimento">
+                    <div class="destaque-icon">🚀</div>
+                    <div class="destaque-label">Maior Crescimento</div>
+                    <div class="destaque-title">${emoji(top.c)} ${label(top.c)}</div>
+                    <div class="destaque-desc">
+                        Cresceu <strong>+R$ ${fmt(top.diff)}</strong>
+                        ${top.prev > 0 ? ` (+${top.diffPct.toFixed(1)}%)` : ' (novo no mês)'} 
+                        em relação a ${mesPrevLabel}.
+                    </div>
+                </div>`);
+            }
+
+            // Maior queda
+            if (quedaRows.length > 0) {
+                const top = quedaRows[0];
+                destaques.push(`
+                <div class="destaque-card d-queda">
+                    <div class="destaque-icon">⚠️</div>
+                    <div class="destaque-label">Maior Queda</div>
+                    <div class="destaque-title">${emoji(top.c)} ${label(top.c)}</div>
+                    <div class="destaque-desc">
+                        Reduziu <strong>R$ ${fmt(Math.abs(top.diff))}</strong>
+                        (${top.diffPct.toFixed(1)}%) em relação a ${mesPrevLabel}.
+                    </div>
+                </div>`);
+            }
+
+            // Estável
+            if (estavelRows.length > 0) {
+                const nomes = estavelRows.map(r => `${emoji(r.c)} ${label(r.c)}`).join(', ');
+                destaques.push(`
+                <div class="destaque-card d-estavel">
+                    <div class="destaque-icon">⚖️</div>
+                    <div class="destaque-label">Estável</div>
+                    <div class="destaque-title">Sem variação</div>
+                    <div class="destaque-desc">${nomes} — mantiveram o mesmo valor de ${mesPrevLabel}.</div>
+                </div>`);
+            }
+
+            // Overall trend text
+            const tendencia = totalAtual > totalPrev
+                ? `A receita total <strong>cresceu R$ ${fmt(totalAtual - totalPrev)}</strong> em relação ao mês anterior.`
+                : totalAtual < totalPrev
+                ? `A receita total <strong>caiu R$ ${fmt(totalPrev - totalAtual)}</strong> em relação ao mês anterior.`
+                : `A receita total se manteve <strong>estável</strong> em relação ao mês anterior.`;
+
+            sec8.innerHTML = `
+            <div style="background:var(--primary-light);border-radius:var(--radius-sm);padding:12px 16px;margin-bottom:14px;font-size:13px;color:var(--primary-dark);">
+                📊 ${tendencia}
+            </div>
+            <div class="destaque-grid">${destaques.join('')}</div>`;
+        }
+
+        // ============================================================
+        // SECTION 9: Média histórica por categoria
+        // ============================================================
+        const sec9 = document.getElementById('compMediaHist');
+        const todosMeses = this._mesesComReceita();
+
+        if (todosMeses.length === 0) {
+            sec9.innerHTML = '<div class="empty-state">Sem histórico de receitas cadastrado</div>';
+        } else {
+            // For each category compute historical monthly avg (exclude current ref month)
+            const mediaCards = cats.map(c => {
+                const mesesHist = todosMeses.filter(m => !(m.mes === mes && m.ano === ano));
+                const somHist = mesesHist.reduce((s, m) => s + this._somaReceitaCatMes(c, m.mes, m.ano), 0);
+                const media = mesesHist.length > 0 ? somHist / mesesHist.length : 0;
+                const atual = dadosAtual.find(d => d.cat === c)?.valor || 0;
+                const diff = atual - media;
+                const diffPct = media > 0 ? (diff / media * 100) : (atual > 0 ? 100 : 0);
+
+                let badgeCls, badgeTxt, insight;
+                if (media === 0 && atual === 0) {
+                    badgeCls = 'equal'; badgeTxt = 'Sem histórico';
+                    insight = 'Nenhum registro para esta categoria.';
+                } else if (media === 0) {
+                    badgeCls = 'above'; badgeTxt = 'Novo';
+                    insight = `Primeira ocorrência registrada este mês.`;
+                } else if (Math.abs(diffPct) < 5) {
+                    badgeCls = 'equal'; badgeTxt = 'Na média';
+                    insight = `Dentro da variação histórica esperada.`;
+                } else if (diff > 0) {
+                    badgeCls = 'above'; badgeTxt = `+${diffPct.toFixed(0)}% acima`;
+                    insight = `${diffPct.toFixed(1)}% acima da média histórica de R$ ${fmt(media)}.`;
+                } else {
+                    badgeCls = 'below'; badgeTxt = `${diffPct.toFixed(0)}% abaixo`;
+                    insight = `${Math.abs(diffPct).toFixed(1)}% abaixo da média histórica de R$ ${fmt(media)}.`;
+                }
+
+                return { c, atual, media, diff, diffPct, badgeCls, badgeTxt, insight, mesesHist: mesesHist.length };
+            });
+
+            sec9.innerHTML = mediaCards.map(m => `
+            <div class="media-card">
+                <div class="media-icon">${emoji(m.c)}</div>
+                <div class="media-body">
+                    <div class="media-cat">
+                        ${label(m.c)}
+                        <span class="media-badge ${m.badgeCls}" style="margin-left:8px;">${m.badgeTxt}</span>
+                    </div>
+                    <div class="media-values">
+                        <div class="media-val-item">
+                            <div class="media-val-label">Mês Atual</div>
+                            <div class="media-val-value">R$ ${fmt(m.atual)}</div>
+                        </div>
+                        <div class="media-val-item">
+                            <div class="media-val-label">Média Histórica</div>
+                            <div class="media-val-value" style="color:var(--gray-500);">R$ ${fmt(m.media)}</div>
+                        </div>
+                        <div class="media-val-item">
+                            <div class="media-val-label">Meses na base</div>
+                            <div class="media-val-value" style="color:var(--gray-500);">${m.mesesHist}</div>
+                        </div>
+                    </div>
+                    <div class="media-insight">💡 ${m.insight}</div>
+                </div>
+            </div>`).join('');
+        }
     },
 
     // ====================== BACKUP ======================
