@@ -687,8 +687,12 @@
                         <input type="date" id="dataReceita" required>
                     </div>
                     <div class="form-group">
-                        <label>Descrição/Cliente</label>
+                        <label>Origem / Cliente</label>
                         <input type="text" id="descricaoReceita" placeholder="Ex: Freelance projeto X" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição (opcional)</label>
+                        <input type="text" id="descricaoLivreReceita" placeholder="Ex: Pagamento cliente X">
                     </div>
                     <div class="form-group">
                         <label>Valor (R$)</label>
@@ -737,8 +741,12 @@
                         <input type="date" id="dataDespesa" required>
                     </div>
                     <div class="form-group">
-                        <label>Descrição</label>
+                        <label>Lançamento</label>
                         <input type="text" id="descricaoDespesa" placeholder="Ex: Aluguel escritório" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Descrição (opcional)</label>
+                        <input type="text" id="descricaoLivreDespesa" placeholder="Ex: Almoço com cliente">
                     </div>
                     <div class="form-group">
                         <label>Valor (R$)</label>
@@ -908,6 +916,25 @@
                         <h2>💰 Gastos por Categoria (Cartão)</h2>
                         <div id="gastosPorCategoria">
                             <div class="empty-state">Nenhuma compra registrada</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="two-column" style="margin-top:18px;">
+                    <div>
+                        <h2>💳 Projeção da Fatura</h2>
+                        <div id="projecaoFaturaCartao">
+                            <div class="empty-state">Nenhum cartão cadastrado</div>
+                        </div>
+
+                        <h2 style="margin-top:22px;">🔔 Alertas Inteligentes</h2>
+                        <div id="alertasCartaoInteligentes">
+                            <div class="empty-state">Sem alertas no momento</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h2>🗓️ Linha do Tempo de Parcelas</h2>
+                        <div id="timelineParcelasCartao">
+                            <div class="empty-state">Nenhuma compra parcelada registrada</div>
                         </div>
                     </div>
                 </div>
@@ -1176,6 +1203,36 @@
                 </div>
                 <div class="error-message" id="msgBackupImportErro" style="margin-top:12px;margin-bottom:0;"></div>
                 <div class="success-message" id="msgBackupImportOk" style="margin-top:12px;margin-bottom:0;"></div>
+            </div>
+
+            <div style="border-top:1px solid var(--gray-200);padding-top:24px;margin-top:24px;">
+                <h3>🔐 Proteção por senha</h3>
+                <p style="font-size:13px;color:var(--gray-500);margin-bottom:14px;line-height:1.6;">
+                    Adicione uma camada extra de proteção ao app.
+                </p>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+                    <span style="font-size:12px;color:var(--gray-500);font-weight:700;">Status:</span>
+                    <span class="badge inactive-badge" id="statusProtecaoLocal">Proteção desativada</span>
+                </div>
+                <div class="error-message" id="msgErroProtecaoLocal" style="margin-bottom:12px;"></div>
+                <div class="success-message" id="msgSucessoProtecaoLocal" style="margin-bottom:12px;"></div>
+                <div class="two-column" style="gap:12px;">
+                    <div class="form-group">
+                        <label>Senha</label>
+                        <input type="password" id="senhaLocal" placeholder="Digite sua senha">
+                    </div>
+                    <div class="form-group">
+                        <label>Confirmar senha</label>
+                        <input type="password" id="confirmarSenhaLocal" placeholder="Confirme sua senha">
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                    <button class="btn-primary" style="width:auto;padding:10px 20px;" onclick="app.ativarSenhaLocal()">Ativar proteção</button>
+                    <button class="btn-warning" style="width:auto;padding:10px 20px;" onclick="app.desativarSenhaLocal()">Desativar proteção</button>
+                </div>
+                <div style="margin-top:12px;font-size:12px;color:var(--gray-500);line-height:1.6;">
+                    Se precisar, você pode redefinir a proteção a qualquer momento.
+                </div>
             </div>
         </div>
     </section>
@@ -4794,5 +4851,857 @@ app.atualizarDashboard = function() {
     this.atualizarCardProjecao();
 };
 </script>
+<script>
+app.gerarParcelasCompra = function(compra) {
+    const dataCompra = new Date(`${compra.dataCompra}T00:00:00`);
+    const cartao = this.dados.cartoes.find(c => c.id === compra.cardId);
+    if (!cartao) return [];
+
+    const diaFechamento = cartao.diaFechamento;
+    const diaCompra = dataCompra.getDate();
+
+    let mesInicial = dataCompra.getMonth();
+    let anoInicial = dataCompra.getFullYear();
+
+    if (diaCompra > diaFechamento) {
+        mesInicial++;
+        if (mesInicial > 11) {
+            mesInicial = 0;
+            anoInicial++;
+        }
+    }
+
+    const valorParcela = this.arredondarMoeda(compra.valorTotal / compra.parcelas);
+    const parcelasGeradas = [];
+
+    for (let i = 0; i < compra.parcelas; i++) {
+        let mes = mesInicial + i;
+        let ano = anoInicial;
+
+        if (mes > 11) {
+            mes = mes % 12;
+            ano += Math.floor((mesInicial + i) / 12);
+        }
+
+        parcelasGeradas.push({
+            id: Date.now() + i,
+            compraId: compra.id,
+            cardId: compra.cardId,
+            descricao: compra.descricao,
+            valor: valorParcela,
+            mes,
+            ano,
+            numero: i + 1,
+            totalParcelas: compra.parcelas,
+            status: 'aberta'
+        });
+    }
+
+    const totalParcelas = parcelasGeradas.reduce((sum, parcela) => sum + parcela.valor, 0);
+    const diferenca = this.arredondarMoeda(compra.valorTotal - totalParcelas);
+    if (parcelasGeradas.length > 0 && Math.abs(diferenca) > 0.01) {
+        parcelasGeradas[parcelasGeradas.length - 1].valor += diferenca;
+    }
+
+    this.dados.parcelas.push(...parcelasGeradas);
+    return parcelasGeradas;
+};
+
+app.gerarParcelas = function(compra) {
+    return this.gerarParcelasCompra(compra);
+};
+
+app.calcularParcelasFuturas = function(cartaoId = null, mesesVisao = 6) {
+    const referencia = new Date();
+    const indiceInicial = referencia.getFullYear() * 12 + referencia.getMonth();
+    const linhaDoTempo = [];
+
+    for (let i = 0; i < mesesVisao; i++) {
+        const data = new Date(referencia.getFullYear(), referencia.getMonth() + i, 1);
+        linhaDoTempo.push({
+            mes: data.getMonth(),
+            ano: data.getFullYear(),
+            indice: data.getFullYear() * 12 + data.getMonth(),
+            label: data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+            total: 0,
+            parcelas: [],
+            porCartao: {}
+        });
+    }
+
+    (this.dados.parcelas || [])
+        .filter(parcela => {
+            if (cartaoId && String(parcela.cardId) !== String(cartaoId)) return false;
+            const indiceParcela = parcela.ano * 12 + parcela.mes;
+            return indiceParcela >= indiceInicial && indiceParcela < indiceInicial + mesesVisao && parcela.status !== 'fechada';
+        })
+        .forEach(parcela => {
+            const item = linhaDoTempo.find(entry => entry.mes === parcela.mes && entry.ano === parcela.ano);
+            if (!item) return;
+
+            const compra = this.dados.compras.find(c => c.id === parcela.compraId);
+            if (compra && compra.status === 'cancelada') return;
+
+            const cartao = this.dados.cartoes.find(c => c.id === parcela.cardId);
+            const nomeCartao = cartao?.nome || 'Cartão';
+            item.total += parcela.valor;
+            item.parcelas.push({
+                ...parcela,
+                descricao: parcela.descricao || compra?.descricao || 'Compra',
+                cartaoNome: nomeCartao
+            });
+            item.porCartao[nomeCartao] = (item.porCartao[nomeCartao] || 0) + parcela.valor;
+        });
+
+    return linhaDoTempo.map(item => ({
+        ...item,
+        total: this.arredondarMoeda(item.total)
+    }));
+};
+
+app.obterContextoCicloCartao = function(cartao, referencia = new Date()) {
+    const hoje = new Date(referencia.getFullYear(), referencia.getMonth(), referencia.getDate());
+    let inicioCiclo;
+    let fimCiclo;
+    let faturaMes;
+    let faturaAno;
+
+    if (hoje.getDate() > cartao.diaFechamento) {
+        inicioCiclo = new Date(hoje.getFullYear(), hoje.getMonth(), cartao.diaFechamento + 1);
+        fimCiclo = new Date(hoje.getFullYear(), hoje.getMonth() + 1, cartao.diaFechamento);
+        const fatura = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 1);
+        faturaMes = fatura.getMonth();
+        faturaAno = fatura.getFullYear();
+    } else {
+        inicioCiclo = new Date(hoje.getFullYear(), hoje.getMonth() - 1, cartao.diaFechamento + 1);
+        fimCiclo = new Date(hoje.getFullYear(), hoje.getMonth(), cartao.diaFechamento);
+        faturaMes = hoje.getMonth();
+        faturaAno = hoje.getFullYear();
+    }
+
+    const msDia = 24 * 60 * 60 * 1000;
+    const diasDecorridos = Math.max(1, Math.floor((hoje - inicioCiclo) / msDia) + 1);
+    const diasTotais = Math.max(diasDecorridos, Math.floor((fimCiclo - inicioCiclo) / msDia) + 1);
+    const diasRestantes = Math.max(diasTotais - diasDecorridos, 0);
+
+    return { inicioCiclo, fimCiclo, faturaMes, faturaAno, diasDecorridos, diasTotais, diasRestantes };
+};
+
+app.calcularProjecaoFatura = function(cartaoId) {
+    const cartao = this.dados.cartoes.find(c => String(c.id) === String(cartaoId));
+    if (!cartao) return null;
+
+    const contexto = this.obterContextoCicloCartao(cartao);
+    const parcelasFaturaAtual = (this.dados.parcelas || []).filter(parcela =>
+        parcela.cardId === cartao.id &&
+        parcela.mes === contexto.faturaMes &&
+        parcela.ano === contexto.faturaAno
+    );
+
+    const totalAtualFatura = parcelasFaturaAtual.reduce((sum, parcela) => sum + parcela.valor, 0);
+
+    const impactoComprasNoCiclo = (this.dados.compras || [])
+        .filter(compra => {
+            if (compra.cardId !== cartao.id || compra.status !== 'ativa') return false;
+            const dataCompra = new Date(`${compra.dataCompra}T00:00:00`);
+            return dataCompra >= contexto.inicioCiclo && dataCompra <= new Date();
+        })
+        .reduce((sum, compra) => {
+            const primeiraParcela = parcelasFaturaAtual.find(parcela => parcela.compraId === compra.id && parcela.numero === 1);
+            return sum + (primeiraParcela ? primeiraParcela.valor : 0);
+        }, 0);
+
+    const mediaDiariaGastoCartao = contexto.diasDecorridos > 0
+        ? this.arredondarMoeda(impactoComprasNoCiclo / contexto.diasDecorridos)
+        : 0;
+    const adicionalProjetado = this.arredondarMoeda(mediaDiariaGastoCartao * contexto.diasRestantes);
+    const valorProjetado = this.arredondarMoeda(totalAtualFatura + adicionalProjetado);
+    const percentualLimiteProjetado = cartao.limiteTotal > 0
+        ? (valorProjetado / cartao.limiteTotal) * 100
+        : 0;
+
+    return {
+        cartao,
+        contexto,
+        totalAtualFatura: this.arredondarMoeda(totalAtualFatura),
+        mediaDiariaGastoCartao,
+        adicionalProjetado,
+        valorProjetado,
+        percentualLimiteProjetado,
+        mensagem: `💳 Mantendo o ritmo atual, sua fatura deve fechar em ~R$ ${this.formatarMoeda(valorProjetado)}.`
+    };
+};
+
+app.gerarAlertasCartao = function() {
+    const alertas = [];
+    const cartoesAtivos = (this.dados.cartoes || []).filter(cartao => cartao.status !== 'inativo');
+
+    cartoesAtivos.forEach(cartao => {
+        const proximosTresMeses = this.calcularParcelasFuturas(cartao.id, 3);
+        const totalParcelado3Meses = this.arredondarMoeda(proximosTresMeses.reduce((sum, item) => sum + item.total, 0));
+        if (totalParcelado3Meses > 0) {
+            alertas.push({
+                tipo: 'parcelamentos',
+                severidade: totalParcelado3Meses > cartao.limiteTotal ? 'risco' : 'atencao',
+                cartaoId: cartao.id,
+                titulo: `💳 ${cartao.nome}`,
+                mensagem: `Parcelamentos futuros somam R$ ${this.formatarMoeda(totalParcelado3Meses)} nos próximos 3 meses.`
+            });
+        }
+
+        const projecao = this.calcularProjecaoFatura(cartao.id);
+        const limiteIdeal = cartao.limiteTotal * 0.6;
+        if (projecao && projecao.valorProjetado > limiteIdeal) {
+            alertas.push({
+                tipo: 'fatura_ideal',
+                severidade: projecao.valorProjetado > cartao.limiteTotal * 0.8 ? 'risco' : 'atencao',
+                cartaoId: cartao.id,
+                titulo: `💳 ${cartao.nome}`,
+                mensagem: 'Se continuar nesse ritmo, a fatura fechará acima do valor ideal.'
+            });
+        }
+
+        const percentualComprometido = cartao.limiteTotal > 0
+            ? (this.calcularLimiteUsado(cartao.id) / cartao.limiteTotal) * 100
+            : 0;
+        if (percentualComprometido >= 70) {
+            alertas.push({
+                tipo: 'uso_elevado',
+                severidade: percentualComprometido >= 85 ? 'risco' : 'atencao',
+                cartaoId: cartao.id,
+                titulo: `💳 ${cartao.nome}`,
+                mensagem: `Você já comprometeu ${percentualComprometido.toFixed(0)}% do limite do cartão.`
+            });
+        }
+    });
+
+    return alertas;
+};
+
+app.renderProjecaoFaturaCartao = function() {
+    const container = document.getElementById('projecaoFaturaCartao');
+    if (!container) return;
+
+    if (!this.dados.cartoes || this.dados.cartoes.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhum cartão cadastrado</div>';
+        return;
+    }
+
+    container.innerHTML = this.dados.cartoes.map(cartao => {
+        const projecao = this.calcularProjecaoFatura(cartao.id);
+        if (!projecao) return '';
+
+        let statusBg = '#ecfdf5';
+        let statusColor = '#166534';
+        let badge = 'Verde (ok)';
+
+        if (projecao.percentualLimiteProjetado >= 80) {
+            statusBg = '#fef2f2';
+            statusColor = '#b91c1c';
+            badge = 'Vermelho (risco)';
+        } else if (projecao.percentualLimiteProjetado >= 60) {
+            statusBg = '#fffbeb';
+            statusColor = '#b45309';
+            badge = 'Amarelo (atenção)';
+        }
+
+        const competencia = new Date(projecao.contexto.faturaAno, projecao.contexto.faturaMes, 1)
+            .toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+
+        return `
+            <div class="goal-item" style="border-left:4px solid ${statusColor};background:${statusBg};margin-bottom:12px;">
+                <div class="goal-header">
+                    <div class="goal-title">💳 ${cartao.nome}</div>
+                    <div class="goal-percentage" style="color:${statusColor};">${projecao.percentualLimiteProjetado.toFixed(0)}%</div>
+                </div>
+                <div class="goal-meta">
+                    Fatura em análise: ${competencia} • Fechamento dia ${cartao.diaFechamento} • ${badge}
+                </div>
+                <div class="goal-meta" style="margin-top:6px;">
+                    Total atual: R$ ${this.formatarMoeda(projecao.totalAtualFatura)} • Média diária do ciclo: R$ ${this.formatarMoeda(projecao.mediaDiariaGastoCartao)}
+                </div>
+                <div class="goal-meta" style="margin-top:6px;font-weight:600;color:${statusColor};">
+                    ${projecao.mensagem}
+                </div>
+            </div>
+        `;
+    }).join('') || '<div class="empty-state">Nenhum cartão cadastrado</div>';
+};
+
+app.renderTimelineParcelasCartao = function() {
+    const container = document.getElementById('timelineParcelasCartao');
+    if (!container) return;
+
+    const timeline = this.calcularParcelasFuturas(null, 6);
+    const temParcelas = timeline.some(item => item.total > 0);
+
+    if (!temParcelas) {
+        container.innerHTML = '<div class="empty-state">Nenhuma compra parcelada registrada</div>';
+        return;
+    }
+
+    container.innerHTML = timeline.map(item => {
+        const breakdown = Object.entries(item.porCartao)
+            .map(([nome, valor]) => `<span style="font-size:11px;color:var(--gray-500);">${nome}: R$ ${this.formatarMoeda(valor)}</span>`)
+            .join(' • ');
+
+        return `
+            <div class="goal-item" style="margin-bottom:12px;">
+                <div class="goal-header">
+                    <div class="goal-title">${item.label}</div>
+                    <div class="goal-percentage">R$ ${this.formatarMoeda(item.total)}</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${Math.min(item.total / Math.max(...timeline.map(t => t.total || 1)) * 100, 100)}%"></div>
+                </div>
+                <div class="goal-meta" style="margin-top:6px;">
+                    ${breakdown || 'Sem parcelas previstas'}
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+app.renderAlertasCartaoInteligentes = function() {
+    const container = document.getElementById('alertasCartaoInteligentes');
+    if (!container) return;
+
+    const alertas = this.gerarAlertasCartao();
+    if (alertas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Sem alertas no momento</div>';
+        return;
+    }
+
+    container.innerHTML = alertas.map(alerta => {
+        let bg = '#ecfdf5';
+        let color = '#166534';
+        if (alerta.severidade === 'atencao') {
+            bg = '#fffbeb';
+            color = '#b45309';
+        } else if (alerta.severidade === 'risco') {
+            bg = '#fef2f2';
+            color = '#b91c1c';
+        }
+
+        return `
+            <div style="padding:12px 14px;border-radius:12px;background:${bg};color:${color};margin-bottom:10px;border-left:4px solid ${color};">
+                <div style="font-weight:700;font-size:12px;margin-bottom:4px;">${alerta.titulo}</div>
+                <div style="font-size:12px;line-height:1.5;">${alerta.mensagem}</div>
+            </div>
+        `;
+    }).join('');
+};
+
+app.renderVisaoFuturaCartao = function() {
+    this.renderProjecaoFaturaCartao();
+    this.renderTimelineParcelasCartao();
+    this.renderAlertasCartaoInteligentes();
+};
+
+const atualizarAnaliseCartaoAvancadaBase = app.atualizarAnalise.bind(app);
+app.atualizarAnalise = function() {
+    atualizarAnaliseCartaoAvancadaBase();
+    this.renderVisaoFuturaCartao();
+};
+
+const atualizarTudoCartaoAvancadoBase = app.atualizarTudoCartao.bind(app);
+app.atualizarTudoCartao = function() {
+    atualizarTudoCartaoAvancadoBase();
+    const campoMesFatura = document.getElementById('mesFatura');
+    if (campoMesFatura && campoMesFatura.value) this.atualizarFaturas();
+};
+
+const pagarFaturaAvancadoBase = app.pagarFatura.bind(app);
+app.pagarFatura = function(chave, cartaoId, mes, ano) {
+    pagarFaturaAvancadoBase(chave, cartaoId, mes, ano);
+    this.atualizarTudoCartao();
+};
+
+const reabrirFaturaAvancadoBase = app.reabrirFatura.bind(app);
+app.reabrirFatura = function(chave) {
+    reabrirFaturaAvancadoBase(chave);
+    this.atualizarTudoCartao();
+};
+</script>
+<script>
+app.obterDescricaoDetalhada = function(item) {
+    return item && typeof item.descricaoDetalhada === 'string' ? item.descricaoDetalhada : '';
+};
+
+app.renderDescricaoDetalhada = function(texto) {
+    return texto
+        ? `<div class="list-item-meta" style="margin-top:4px;">${texto}</div>`
+        : '';
+};
+
+app.criarReceita = function() {
+    return {
+        id: Date.now(),
+        data: document.getElementById('dataReceita').value,
+        descricao: document.getElementById('descricaoReceita').value,
+        descricaoDetalhada: (document.getElementById('descricaoLivreReceita')?.value || '').trim(),
+        valor: parseFloat(document.getElementById('valorReceita').value),
+        categoria: document.getElementById('categoriaReceita').value,
+        status: document.getElementById('statusReceita').value
+    };
+};
+
+app.atualizarReceita = function(id, dadosAtualizados) {
+    const receita = this.dados.receitas.find(item => String(item.id) === String(id));
+    if (!receita) return false;
+
+    Object.assign(receita, {
+        ...dadosAtualizados,
+        descricaoDetalhada: (dadosAtualizados.descricaoDetalhada || '').trim()
+    });
+    return true;
+};
+
+app.updateReceita = function(id, dadosAtualizados) {
+    return this.atualizarReceita(id, dadosAtualizados);
+};
+
+app.adicionarReceita = function(e) {
+    e.preventDefault();
+
+    const estavaEditando = this.editingReceitaId !== null;
+    const dadosReceita = this.criarReceita();
+
+    if (estavaEditando) {
+        const atualizou = this.atualizarReceita(this.editingReceitaId, dadosReceita);
+        if (!atualizou) {
+            this.resetarFormularioReceita();
+            return;
+        }
+    } else {
+        this.dados.receitas.push(dadosReceita);
+    }
+
+    this.salvarDados();
+    this.resetarFormularioReceita();
+    this.mostrarMensagem(
+        'mensagemSucesso',
+        estavaEditando ? 'Receita atualizada com sucesso!' : 'Receita adicionada com sucesso!'
+    );
+    this.renderizarDependenciasReceita();
+};
+
+app.editarReceita = function(id) {
+    const receita = this.dados.receitas.find(item => String(item.id) === String(id));
+    if (!receita) return;
+
+    this.editingReceitaId = id;
+    document.getElementById('dataReceita').value = receita.data;
+    document.getElementById('descricaoReceita').value = receita.descricao;
+    document.getElementById('descricaoLivreReceita').value = this.obterDescricaoDetalhada(receita);
+    document.getElementById('valorReceita').value = receita.valor;
+    document.getElementById('categoriaReceita').value = receita.categoria;
+    document.getElementById('statusReceita').value = receita.status;
+
+    const botao = this.getBotaoSubmitReceita();
+    if (botao) botao.textContent = 'Atualizar Receita';
+
+    const secao = document.querySelector('[data-section="receitas"]');
+    if (secao) secao.click();
+};
+
+app.listarReceitas = function(filtro = 'todas') {
+    const container = document.getElementById('listaReceitas');
+    const receitas = filtro === 'todas'
+        ? [...this.dados.receitas]
+        : this.dados.receitas.filter(item => item.status === filtro);
+
+    receitas.sort((a, b) => new Date(b.data) - new Date(a.data));
+    if (receitas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma receita registrada</div>';
+        return;
+    }
+
+    container.innerHTML = receitas.map(receita => `
+        <div class="list-item">
+            <div class="list-item-content">
+                <div class="list-item-title">${receita.descricao}</div>
+                <div class="list-item-meta">${this.formatarData(receita.data)} • ${receita.categoria} • ${receita.status === 'recebido' ? '✓ Recebido' : '⏳ Pendente'}</div>
+                ${this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(receita))}
+            </div>
+            <div class="list-item-value income">+ R$ ${this.formatarMoeda(receita.valor)}</div>
+            <div class="list-actions">
+                <button class="btn-warning btn-small" onclick="app.editarReceita(${receita.id})">Editar</button>
+                <button class="btn-danger btn-small" onclick="app.deletarReceita(${receita.id})">Del</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+app.criarDespesa = function() {
+    return {
+        id: Date.now(),
+        data: document.getElementById('dataDespesa').value,
+        descricao: document.getElementById('descricaoDespesa').value,
+        descricaoDetalhada: (document.getElementById('descricaoLivreDespesa')?.value || '').trim(),
+        valor: parseFloat(document.getElementById('valorDespesa').value),
+        categoria: document.getElementById('categoriaDespesa').value,
+        tipo: document.getElementById('tipoDespesa').value
+    };
+};
+
+app.atualizarDespesa = function(id, dadosAtualizados) {
+    const despesa = this.dados.despesas.find(item => String(item.id) === String(id));
+    if (!despesa) return false;
+
+    Object.assign(despesa, {
+        ...dadosAtualizados,
+        descricaoDetalhada: (dadosAtualizados.descricaoDetalhada || '').trim()
+    });
+    return true;
+};
+
+app.renderizarDependenciasDespesa = function() {
+    this.verificarAlertasTeto();
+    this.renderTetoCards();
+    this.atualizarDashboard();
+    this.listarDespesas('todas');
+};
+
+app.adicionarDespesa = function(e) {
+    e.preventDefault();
+
+    const estavaEditando = this.editingExpenseId !== null;
+    const dadosDespesa = this.criarDespesa();
+
+    if (estavaEditando) {
+        const atualizou = this.atualizarDespesa(this.editingExpenseId, dadosDespesa);
+        if (!atualizou) {
+            this.resetarFormularioDespesa();
+            return;
+        }
+    } else {
+        this.dados.despesas.push(dadosDespesa);
+    }
+
+    this.salvarDados();
+    this.resetarFormularioDespesa();
+    this.mostrarMensagem(
+        'mensagemSucessoDespesa',
+        estavaEditando ? 'Despesa atualizada com sucesso!' : 'Despesa adicionada com sucesso!'
+    );
+    this.renderizarDependenciasDespesa();
+};
+
+app.editarDespesa = function(id) {
+    const despesa = this.dados.despesas.find(item => String(item.id) === String(id));
+    if (!despesa) return;
+
+    this.editingExpenseId = id;
+    document.getElementById('dataDespesa').value = despesa.data;
+    document.getElementById('descricaoDespesa').value = despesa.descricao;
+    document.getElementById('descricaoLivreDespesa').value = this.obterDescricaoDetalhada(despesa);
+    document.getElementById('valorDespesa').value = despesa.valor;
+    document.getElementById('categoriaDespesa').value = despesa.categoria;
+    document.getElementById('tipoDespesa').value = despesa.tipo;
+
+    const botao = this.getBotaoSubmitDespesa();
+    if (botao) botao.textContent = 'Atualizar Despesa';
+
+    document.querySelector('[data-section="despesas"]').click();
+};
+
+app.listarDespesas = function(filtro = 'todas') {
+    const container = document.getElementById('listaDespesas');
+    const despesas = filtro === 'todas'
+        ? [...this.dados.despesas]
+        : this.dados.despesas.filter(item => item.tipo === filtro);
+
+    despesas.sort((a, b) => new Date(b.data) - new Date(a.data));
+    if (despesas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma despesa registrada</div>';
+        return;
+    }
+
+    container.innerHTML = despesas.map(despesa => `
+        <div class="list-item expense">
+            <div class="list-item-content">
+                <div class="list-item-title">${despesa.descricao}</div>
+                <div class="list-item-meta">${this.formatarData(despesa.data)} • ${app._resolveEmoji(despesa.categoria)} ${despesa.categoria} • ${despesa.tipo}</div>
+                ${this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(despesa))}
+            </div>
+            <div class="list-item-value expense">- R$ ${this.formatarMoeda(despesa.valor)}</div>
+            <div class="list-actions">
+                <button class="btn-warning btn-small" onclick="app.editarDespesa(${despesa.id})">Editar</button>
+                <button class="btn-danger btn-small" onclick="app.deletarDespesa(${despesa.id})">Del</button>
+            </div>
+        </div>
+    `).join('');
+};
+
+app.atualizarUltimasTransacoes = function() {
+    const container = document.getElementById('ultimasTransacoes');
+    const agora = new Date();
+    const mes = agora.getMonth();
+    const ano = agora.getFullYear();
+
+    const parcelasDoMes = this.dados.parcelas
+        .filter(parcela => parcela.mes === mes && parcela.ano === ano)
+        .map(parcela => {
+            const compra = this.dados.compras.find(item => item.id === parcela.compraId);
+            const cartao = this.dados.cartoes.find(item => item.id === parcela.cardId);
+            return {
+                tipo: 'cartao',
+                data: compra?.dataCompra || `${ano}-${String(mes + 1).padStart(2, '0')}-01`,
+                descricao: `${compra?.descricao || 'Compra'} (${cartao?.nome || 'Cartão'} ${parcela.numero}/${parcela.totalParcelas})`,
+                valor: parcela.valor,
+                descricaoDetalhada: ''
+            };
+        });
+
+    const transacoes = [
+        ...this.dados.receitas.map(receita => ({ ...receita, tipo: 'receita', descricaoDetalhada: this.obterDescricaoDetalhada(receita) })),
+        ...this.dados.despesas.map(despesa => ({ ...despesa, tipo: 'despesa', descricaoDetalhada: this.obterDescricaoDetalhada(despesa) })),
+        ...parcelasDoMes
+    ];
+
+    transacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+    const ultimas = transacoes.slice(0, 6);
+
+    if (ultimas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma transação registrada</div>';
+        return;
+    }
+
+    container.innerHTML = ultimas.map(transacao => {
+        const isReceita = transacao.tipo === 'receita';
+        const isCartao = transacao.tipo === 'cartao';
+        return `
+            <div class="list-item ${!isReceita && !isCartao ? 'expense' : ''} ${isCartao ? 'card-item' : ''}">
+                <div class="list-item-content">
+                    <div class="list-item-title">${transacao.descricao}</div>
+                    <div class="list-item-meta">${this.formatarData(transacao.data)}${isCartao ? ' • Cartão' : ''}</div>
+                    ${!isCartao ? this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(transacao)) : ''}
+                </div>
+                <div class="list-item-value ${isReceita ? 'income' : isCartao ? 'card-val' : 'expense'}">
+                    ${isReceita ? '+' : '-'} R$ ${this.formatarMoeda(transacao.valor)}
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+</script>
+<script>
+app._protecaoLocalKey = 'financeiroProtecaoLocal';
+
+app.obterConfigProtecaoLocal = function() {
+    try {
+        const raw = localStorage.getItem(this._protecaoLocalKey);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        return parsed && parsed.hash ? parsed : null;
+    } catch (error) {
+        return null;
+    }
+};
+
+app.salvarConfigProtecaoLocal = function(config) {
+    localStorage.setItem(this._protecaoLocalKey, JSON.stringify(config));
+};
+
+app.removerConfigProtecaoLocal = function() {
+    localStorage.removeItem(this._protecaoLocalKey);
+};
+
+app.gerarHashSenha = async function(senha) {
+    const valor = `financeiro-local::${senha}`;
+
+    try {
+        if (window.crypto && window.crypto.subtle && window.TextEncoder) {
+            const bytes = new TextEncoder().encode(valor);
+            const digest = await window.crypto.subtle.digest('SHA-256', bytes);
+            return Array.from(new Uint8Array(digest))
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+        }
+    } catch (error) {
+        // fallback abaixo
+    }
+
+    let hash = 2166136261;
+    for (let i = 0; i < valor.length; i++) {
+        hash ^= valor.charCodeAt(i);
+        hash = Math.imul(hash, 16777619);
+    }
+    return `fallback-${(hash >>> 0).toString(16)}`;
+};
+
+app.validarSenha = async function(senha) {
+    const config = this.obterConfigProtecaoLocal();
+    if (!config) return true;
+    const hash = await this.gerarHashSenha(senha);
+    return hash === config.hash;
+};
+
+app.bloquearInterfaceProtegida = function() {
+    const overlay = document.getElementById('lockScreenOverlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+};
+
+app.liberarInterfaceProtegida = function() {
+    const overlay = document.getElementById('lockScreenOverlay');
+    if (!overlay) return;
+    overlay.style.display = 'none';
+    document.body.style.overflow = '';
+
+    const unlockInput = document.getElementById('senhaUnlock');
+    if (unlockInput) unlockInput.value = '';
+
+    const erroUnlock = document.getElementById('msgErroUnlock');
+    if (erroUnlock) erroUnlock.classList.remove('show');
+    const okUnlock = document.getElementById('msgSucessoUnlock');
+    if (okUnlock) okUnlock.classList.remove('show');
+};
+
+app.atualizarStatusProtecaoLocalUi = function() {
+    const statusEl = document.getElementById('statusProtecaoLocal');
+    if (!statusEl) return;
+
+    const ativa = !!this.obterConfigProtecaoLocal();
+    statusEl.className = `badge ${ativa ? 'active-badge' : 'inactive-badge'}`;
+    statusEl.textContent = ativa ? 'Proteção ativada' : 'Proteção desativada';
+};
+
+app.limparCamposProtecaoLocal = function() {
+    const senhaEl = document.getElementById('senhaLocal');
+    const confirmarEl = document.getElementById('confirmarSenhaLocal');
+    if (senhaEl) senhaEl.value = '';
+    if (confirmarEl) confirmarEl.value = '';
+};
+
+app.ativarSenhaLocal = async function() {
+    const senha = document.getElementById('senhaLocal')?.value || '';
+    const confirmar = document.getElementById('confirmarSenhaLocal')?.value || '';
+
+    if (!senha || !confirmar) {
+        this.mostrarErro('msgErroProtecaoLocal', 'Preencha os campos.');
+        return;
+    }
+
+    if (senha.length < 4) {
+        this.mostrarErro('msgErroProtecaoLocal', 'Use pelo menos 4 caracteres.');
+        return;
+    }
+
+    if (senha !== confirmar) {
+        this.mostrarErro('msgErroProtecaoLocal', 'As senhas não coincidem.');
+        return;
+    }
+
+    const hash = await this.gerarHashSenha(senha);
+    this.salvarConfigProtecaoLocal({
+        hash,
+        ativa: true,
+        criadaEm: new Date().toISOString()
+    });
+
+    this.limparCamposProtecaoLocal();
+    this.atualizarStatusProtecaoLocalUi();
+    this.mostrarMensagem('msgSucessoProtecaoLocal', 'Proteção ativada.');
+};
+
+app.desativarSenhaLocal = async function() {
+    const config = this.obterConfigProtecaoLocal();
+    if (!config) {
+        this.mostrarErro('msgErroProtecaoLocal', 'A proteção já está desativada.');
+        return;
+    }
+
+    const confirmar = confirm('Desativar a proteção por senha?');
+    if (!confirmar) return;
+
+    this.removerConfigProtecaoLocal();
+    this.liberarInterfaceProtegida();
+    this.limparCamposProtecaoLocal();
+    this.atualizarStatusProtecaoLocalUi();
+    this.mostrarMensagem('msgSucessoProtecaoLocal', 'Proteção desativada.');
+};
+
+app.tentarDesbloquearApp = async function() {
+    const senha = document.getElementById('senhaUnlock')?.value || '';
+    if (!senha) {
+        this.mostrarErro('msgErroUnlock', 'Digite sua senha.');
+        return;
+    }
+
+    const valida = await this.validarSenha(senha);
+    if (!valida) {
+        this.mostrarErro('msgErroUnlock', 'Senha incorreta.');
+        return;
+    }
+
+    this.liberarInterfaceProtegida();
+};
+
+app.resetarSenhaLocal = function() {
+    const config = this.obterConfigProtecaoLocal();
+    if (!config) {
+        this.mostrarErro('msgErroUnlock', 'Nenhuma proteção ativa.');
+        return;
+    }
+
+    const confirmar = confirm('Redefinir a proteção?');
+    if (!confirmar) return;
+
+    this.removerConfigProtecaoLocal();
+    this.liberarInterfaceProtegida();
+    this.atualizarStatusProtecaoLocalUi();
+    this.limparCamposProtecaoLocal();
+    this.mostrarMensagem('msgSucessoProtecaoLocal', 'Proteção redefinida.');
+};
+
+app.verificarProtecaoAoAbrirApp = async function() {
+    try {
+        const config = this.obterConfigProtecaoLocal();
+        this.atualizarStatusProtecaoLocalUi();
+
+        if (!config) {
+            this.liberarInterfaceProtegida();
+            return;
+        }
+
+        this.bloquearInterfaceProtegida();
+        const unlockInput = document.getElementById('senhaUnlock');
+        if (unlockInput) setTimeout(() => unlockInput.focus(), 50);
+    } catch (error) {
+        this.removerConfigProtecaoLocal();
+        this.liberarInterfaceProtegida();
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    app.atualizarStatusProtecaoLocalUi();
+    app.verificarProtecaoAoAbrirApp();
+});
+</script>
+<div id="lockScreenOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:24px;align-items:center;justify-content:center;">
+    <div style="width:min(100%,420px);background:#ffffff;border-radius:18px;padding:24px;box-shadow:0 24px 80px rgba(15,23,42,0.35);">
+        <div style="font-size:28px;margin-bottom:10px;">🔐</div>
+        <h2 style="margin-bottom:8px;color:var(--gray-900);">Proteção por senha</h2>
+        <p style="font-size:13px;color:var(--gray-500);line-height:1.6;margin-bottom:16px;">
+            Digite sua senha para continuar.
+        </p>
+        <div class="error-message" id="msgErroUnlock" style="margin-bottom:12px;"></div>
+        <div class="success-message" id="msgSucessoUnlock" style="margin-bottom:12px;"></div>
+        <div class="form-group">
+            <label>Senha</label>
+            <input type="password" id="senhaUnlock" placeholder="Digite sua senha" onkeydown="if(event.key==='Enter'){app.tentarDesbloquearApp();}">
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;">
+            <button class="btn-primary" style="width:auto;padding:10px 20px;" onclick="app.tentarDesbloquearApp()">Entrar</button>
+            <button class="btn-warning" style="width:auto;padding:10px 20px;" onclick="app.resetarSenhaLocal()">Redefinir proteção</button>
+        </div>
+        <div style="margin-top:12px;font-size:12px;color:var(--gray-500);line-height:1.6;">
+            Redefina a proteção se necessário.
+        </div>
+    </div>
+</div>
 </body>
 </html>
