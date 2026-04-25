@@ -680,7 +680,7 @@
                             <option value="pendente">⏳ Pendente</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-primary">Adicionar Receita</button>
+                    <button type="submit" class="btn-primary" id="btnSubmitReceita">Adicionar Receita</button>
                 </form>
             </div>
 
@@ -3337,6 +3337,592 @@ app.deletarDespesa = function(id) {
     this.salvarDados();
     this.atualizarDashboard();
     this.listarDespesas('todas');
+};
+</script>
+<script>
+app.editingMetaId = null;
+app.openAporteMetaId = null;
+
+app.getMetaFormTitle = function() {
+    return document.querySelector('#tab-poupanca .two-column > div:first-child h2');
+};
+
+app.getMetaSubmitButton = function() {
+    return document.querySelector('#formMeta button[type="submit"]');
+};
+
+app.ensureMetaUi = function() {
+    const successEl = document.getElementById('mensagemSucessoMeta');
+    if (successEl && !document.getElementById('mensagemErroMeta')) {
+        const errorEl = document.createElement('div');
+        errorEl.className = 'error-message';
+        errorEl.id = 'mensagemErroMeta';
+        successEl.insertAdjacentElement('afterend', errorEl);
+    }
+
+    const valorAtualInput = document.getElementById('valorAtualMeta');
+    if (valorAtualInput) {
+        const group = valorAtualInput.closest('.form-group');
+        if (group) group.id = 'grupoValorAtualMeta';
+        const label = group ? group.querySelector('label') : null;
+        if (label) label.textContent = 'Aporte Inicial (R$)';
+    }
+
+    const descricaoInput = document.getElementById('descricaoMeta');
+    if (descricaoInput && !descricaoInput.dataset.defaultPlaceholder) {
+        descricaoInput.dataset.defaultPlaceholder = descricaoInput.placeholder || '';
+    }
+
+    const form = document.getElementById('formMeta');
+    if (form && !document.getElementById('metaFormHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'metaFormHint';
+        hint.style.fontSize = '12px';
+        hint.style.color = 'var(--gray-500)';
+        hint.style.marginTop = '8px';
+        form.appendChild(hint);
+    }
+
+    this.atualizarModoFormularioMeta();
+};
+
+app.atualizarModoFormularioMeta = function() {
+    const editing = this.editingMetaId !== null;
+    const title = this.getMetaFormTitle();
+    const submitButton = this.getMetaSubmitButton();
+    const valorAtualInput = document.getElementById('valorAtualMeta');
+    const valorAtualGroup = document.getElementById('grupoValorAtualMeta');
+    const descricaoInput = document.getElementById('descricaoMeta');
+    const hint = document.getElementById('metaFormHint');
+
+    if (title) title.textContent = editing ? 'Editar Meta de Poupança' : 'Criar Meta de Poupança';
+    if (submitButton) submitButton.textContent = editing ? 'Salvar Meta' : 'Criar Meta';
+
+    if (valorAtualGroup) valorAtualGroup.style.display = editing ? 'none' : '';
+    if (valorAtualInput && editing) valorAtualInput.value = '';
+
+    if (descricaoInput) {
+        descricaoInput.disabled = editing;
+        descricaoInput.placeholder = editing
+            ? 'A descrição permanece a mesma na edição.'
+            : (descricaoInput.dataset.defaultPlaceholder || 'Detalhes sobre a meta...');
+        descricaoInput.title = editing
+            ? 'A edição da meta altera apenas nome, valor objetivo e data objetivo.'
+            : '';
+    }
+
+    if (hint) {
+        hint.textContent = editing
+            ? 'A edição da meta não altera o saldo acumulado. Para registrar dinheiro novo, use "Adicionar valor" na meta.'
+            : 'Use "Aporte Inicial" só na criação. Depois disso, novos valores entram pelo histórico de aportes.';
+    }
+};
+
+app.getAportesMeta = function(metaId) {
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    return this.dados.aportesMeta
+        .filter(a => String(a.metaId) === String(metaId))
+        .sort((a, b) => {
+            const dateDiff = new Date((b.data || '') + 'T00:00:00').getTime() - new Date((a.data || '') + 'T00:00:00').getTime();
+            if (dateDiff !== 0 && !Number.isNaN(dateDiff)) return dateDiff;
+            return String(b.id).localeCompare(String(a.id));
+        });
+};
+
+app.getValorAtualMeta = function(metaId) {
+    return this.getAportesMeta(metaId).reduce((sum, aporte) => sum + (parseFloat(aporte.valor) || 0), 0);
+};
+
+app.sincronizarValorAtualMetas = function() {
+    if (!Array.isArray(this.dados.metas)) this.dados.metas = [];
+    this.dados.metas.forEach(meta => {
+        if (meta.tipo !== 'teto') meta.valorAtual = this.getValorAtualMeta(meta.id);
+    });
+};
+
+app.criarAporteMeta = function(metaId, valor, data, observacao) {
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    this.dados.aportesMeta.push({
+        id: `${Date.now()}-${Math.random().toString(16).slice(2, 8)}`,
+        metaId: metaId,
+        valor: parseFloat(valor) || 0,
+        data: data || new Date().toISOString().split('T')[0],
+        observacao: observacao || ''
+    });
+};
+
+app.migrarAportesMetaLegados = function() {
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    let changed = false;
+    const hoje = new Date().toISOString().split('T')[0];
+
+    (this.dados.metas || []).forEach(meta => {
+        if (meta.tipo === 'teto') return;
+
+        const valorLegado = parseFloat(meta.valorAtual) || 0;
+        const temAporte = this.dados.aportesMeta.some(aporte => String(aporte.metaId) === String(meta.id));
+
+        if (!temAporte && valorLegado > 0) {
+            this.criarAporteMeta(meta.id, valorLegado, hoje, 'Aporte inicial migrado automaticamente');
+            changed = true;
+        }
+    });
+
+    this.sincronizarValorAtualMetas();
+    return changed;
+};
+
+const originalCarregarDadosMeta = app.carregarDados.bind(app);
+app.carregarDados = function() {
+    originalCarregarDadosMeta();
+
+    if (!Array.isArray(this.dados.aportesMeta)) {
+        try {
+            const legacyBase = JSON.parse(localStorage.getItem('financasApp') || '{}');
+            this.dados.aportesMeta = Array.isArray(legacyBase.aportesMeta) ? legacyBase.aportesMeta : [];
+        } catch (error) {
+            this.dados.aportesMeta = [];
+        }
+    }
+
+    const changed = this.migrarAportesMetaLegados();
+    this.sincronizarValorAtualMetas();
+    if (changed) this.salvarDados();
+};
+
+const originalSalvarDadosMeta = app.salvarDados.bind(app);
+app.salvarDados = function() {
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    this.sincronizarValorAtualMetas();
+    originalSalvarDadosMeta();
+
+    try {
+        const legacyBase = JSON.parse(localStorage.getItem('financasApp') || '{}');
+        legacyBase.aportesMeta = this.dados.aportesMeta;
+        localStorage.setItem('financasApp', JSON.stringify(legacyBase));
+    } catch (error) {
+        localStorage.setItem('financasApp', JSON.stringify({
+            receitas: this.dados.receitas,
+            despesas: this.dados.despesas,
+            metas: this.dados.metas,
+            aportesMeta: this.dados.aportesMeta
+        }));
+    }
+};
+
+app.resetarFormularioMeta = function() {
+    const form = document.getElementById('formMeta');
+    if (form) form.reset();
+
+    this.editingMetaId = null;
+    this.openAporteMetaId = null;
+
+    const tipoMeta = document.getElementById('tipoMeta');
+    if (tipoMeta) tipoMeta.value = 'poupanca';
+
+    this.setarDataAtual();
+
+    const descricaoInput = document.getElementById('descricaoMeta');
+    if (descricaoInput) descricaoInput.value = '';
+
+    const errorEl = document.getElementById('mensagemErroMeta');
+    if (errorEl) errorEl.classList.remove('show');
+
+    this.atualizarModoFormularioMeta();
+};
+
+app.abrirTelaMetasPoupanca = function() {
+    const sectionBtn = document.querySelector('[data-section="metas"]');
+    if (sectionBtn) sectionBtn.click();
+    const tabBtn = document.querySelector('[data-metas-tab="tab-poupanca"]');
+    if (tabBtn) tabBtn.click();
+};
+
+const originalAdicionarMeta = app.adicionarMeta.bind(app);
+app.adicionarMeta = function(e) {
+    e.preventDefault();
+
+    const tipo = document.getElementById('tipoMeta').value;
+    if (tipo !== 'poupanca') {
+        originalAdicionarMeta(e);
+        return;
+    }
+
+    const nome = document.getElementById('nomeMeta').value.trim();
+    const valorAlvo = parseFloat(document.getElementById('valorMeta').value) || 0;
+    const dataLimite = document.getElementById('dataLimiteMeta').value;
+    const descricao = document.getElementById('descricaoMeta').value;
+    const aporteInicial = parseFloat(document.getElementById('valorAtualMeta').value) || 0;
+
+    if (!nome) {
+        this.mostrarErro('mensagemErroMeta', 'Informe o nome da meta.');
+        return;
+    }
+
+    if (this.editingMetaId !== null) {
+        const meta = this.dados.metas.find(item => String(item.id) === String(this.editingMetaId));
+        if (!meta) {
+            this.resetarFormularioMeta();
+            this.mostrarErro('mensagemErroMeta', 'Meta não encontrada para edição.');
+            return;
+        }
+
+        meta.nome = nome;
+        meta.valorAlvo = valorAlvo;
+        meta.dataLimite = dataLimite;
+        meta.tipo = 'poupanca';
+
+        this.salvarDados();
+        this.resetarFormularioMeta();
+        this.mostrarMensagem('mensagemSucessoMeta', 'Meta atualizada com sucesso!');
+    } else {
+        const meta = {
+            id: Date.now(),
+            nome: nome,
+            tipo: 'poupanca',
+            descricao: descricao,
+            valorAlvo: valorAlvo,
+            valorAtual: 0,
+            dataLimite: dataLimite
+        };
+
+        this.dados.metas.push(meta);
+        if (aporteInicial > 0) {
+            this.criarAporteMeta(meta.id, aporteInicial, new Date().toISOString().split('T')[0], 'Aporte inicial');
+        }
+
+        this.salvarDados();
+        this.resetarFormularioMeta();
+        this.mostrarMensagem('mensagemSucessoMeta', 'Meta criada com sucesso!');
+    }
+
+    this.atualizarDashboard();
+    this.listarMetas();
+    this.abrirTelaMetasPoupanca();
+};
+
+app.editarMeta = function(id) {
+    const meta = this.dados.metas.find(item => String(item.id) === String(id));
+    if (!meta || meta.tipo === 'teto') return;
+
+    this.editingMetaId = id;
+    document.getElementById('nomeMeta').value = meta.nome || '';
+    document.getElementById('tipoMeta').value = 'poupanca';
+    document.getElementById('valorMeta').value = meta.valorAlvo || 0;
+    document.getElementById('valorAtualMeta').value = '';
+    document.getElementById('dataLimiteMeta').value = meta.dataLimite || '';
+    document.getElementById('descricaoMeta').value = meta.descricao || '';
+
+    this.atualizarModoFormularioMeta();
+    this.abrirTelaMetasPoupanca();
+};
+
+app.deletarMeta = function(id) {
+    if (!confirm('Deseja deletar esta meta?')) return;
+
+    this.dados.metas = this.dados.metas.filter(meta => String(meta.id) !== String(id));
+    this.dados.aportesMeta = (this.dados.aportesMeta || []).filter(aporte => String(aporte.metaId) !== String(id));
+
+    if (String(this.editingMetaId) === String(id)) this.resetarFormularioMeta();
+    if (String(this.openAporteMetaId) === String(id)) this.openAporteMetaId = null;
+
+    this.salvarDados();
+    this.atualizarDashboard();
+    this.listarMetas();
+};
+
+app.toggleAporteMeta = function(metaId) {
+    this.openAporteMetaId = String(this.openAporteMetaId) === String(metaId) ? null : metaId;
+    this.listarMetas();
+};
+
+app.cancelarAporteMeta = function(metaId) {
+    if (String(this.openAporteMetaId) === String(metaId)) this.openAporteMetaId = null;
+    this.listarMetas();
+};
+
+app.adicionarAporteMeta = function(metaId) {
+    const meta = this.dados.metas.find(item => String(item.id) === String(metaId));
+    if (!meta || meta.tipo === 'teto') return;
+
+    const valorInput = document.getElementById(`aporteValorMeta-${metaId}`);
+    const dataInput = document.getElementById(`aporteDataMeta-${metaId}`);
+    const obsInput = document.getElementById(`aporteObsMeta-${metaId}`);
+
+    const valor = valorInput ? parseFloat(valorInput.value) || 0 : 0;
+    const data = dataInput && dataInput.value ? dataInput.value : new Date().toISOString().split('T')[0];
+    const observacao = obsInput ? obsInput.value.trim() : '';
+
+    if (valor <= 0) {
+        alert('Informe um valor de aporte maior que zero.');
+        return;
+    }
+
+    this.criarAporteMeta(metaId, valor, data, observacao);
+    this.salvarDados();
+    this.openAporteMetaId = null;
+    this.mostrarMensagem('mensagemSucessoMeta', 'Aporte registrado com sucesso!');
+    this.atualizarDashboard();
+    this.listarMetas();
+    this.abrirTelaMetasPoupanca();
+};
+
+app.listarMetas = function() {
+    const container = document.getElementById('listaMetas');
+    if (!container) return;
+
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    this.sincronizarValorAtualMetas();
+
+    if (this.dados.metas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma meta registrada</div>';
+        return;
+    }
+
+    const agora = new Date();
+    const mesAtual = agora.getMonth();
+    const anoAtual = agora.getFullYear();
+
+    container.innerHTML = this.dados.metas.map(meta => {
+        if (meta.tipo === 'teto') {
+            const gasto = this.calcularGastoCategoriaNoMes(meta.categoria, mesAtual, anoAtual);
+            const percentual = meta.teto > 0 ? Math.min((gasto / meta.teto) * 100, 100) : 0;
+            const over = gasto > meta.teto;
+            let badgeCls = 'teto-ok';
+            let badgeLabel = 'OK';
+            if (gasto > meta.teto) {
+                badgeCls = 'teto-estourado';
+                badgeLabel = 'Estourado';
+            } else if (gasto >= meta.teto * 0.8) {
+                badgeCls = 'teto-alerta';
+                badgeLabel = 'Alerta';
+            }
+
+            return `
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <div class="goal-title">${app._resolveEmoji(meta.categoria)} ${meta.nome} <span class="teto-badge ${badgeCls}">${badgeLabel}</span></div>
+                        <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${over ? 'over' : ''}" style="width:${percentual}%"></div>
+                    </div>
+                    <div class="goal-meta">
+                        Gasto: R$ ${this.formatarMoeda(gasto)} / Teto: R$ ${this.formatarMoeda(meta.teto)}
+                        • Categoria: ${meta.categoria} (inclui cartão)
+                    </div>
+                    <div style="margin-top:8px;display:flex;gap:5px;">
+                        <button class="btn-danger btn-small" onclick="app.deletarMeta(${meta.id})">Deletar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        const valorAtual = this.getValorAtualMeta(meta.id);
+        const valorAlvo = parseFloat(meta.valorAlvo) || 0;
+        const percentual = valorAlvo > 0 ? Math.min((valorAtual / valorAlvo) * 100, 100) : 0;
+        const faltante = Math.max(valorAlvo - valorAtual, 0);
+        const aportes = this.getAportesMeta(meta.id);
+        const historico = aportes.slice(0, 3).map(aporte => `
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid rgba(0,0,0,0.06);font-size:12px;">
+                <span>${this.formatarData(aporte.data)}${aporte.observacao ? ' • ' + aporte.observacao : ''}</span>
+                <strong style="color:var(--success);white-space:nowrap;">+ R$ ${this.formatarMoeda(aporte.valor)}</strong>
+            </div>
+        `).join('');
+
+        const aporteAberto = String(this.openAporteMetaId) === String(meta.id);
+        const dataPadrao = new Date().toISOString().split('T')[0];
+
+        return `
+            <div class="goal-item">
+                <div class="goal-header">
+                    <div class="goal-title">${meta.nome}</div>
+                    <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${percentual}%"></div>
+                </div>
+                <div class="goal-meta">
+                    R$ ${this.formatarMoeda(valorAtual)} / R$ ${this.formatarMoeda(valorAlvo)}
+                    • Faltam: R$ ${this.formatarMoeda(faltante)}
+                    ${meta.dataLimite ? ' • Objetivo: ' + this.formatarData(meta.dataLimite) : ''}
+                </div>
+                <div class="goal-meta" style="margin-top:8px;">
+                    ${meta.descricao ? meta.descricao + ' • ' : ''}${aportes.length} aporte(s) registrado(s)
+                </div>
+                <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">
+                    <button class="btn-warning btn-small" onclick="app.editarMeta(${meta.id})">Editar</button>
+                    <button class="btn-success btn-small" onclick="app.toggleAporteMeta(${meta.id})">${aporteAberto ? 'Fechar aporte' : 'Adicionar valor'}</button>
+                    <button class="btn-danger btn-small" onclick="app.deletarMeta(${meta.id})">Deletar</button>
+                </div>
+                <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(102,126,234,0.06);">
+                    <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:6px;">Histórico recente de aportes</div>
+                    ${historico || '<div style="font-size:12px;color:var(--gray-500);">Nenhum aporte registrado ainda.</div>'}
+                </div>
+                ${aporteAberto ? `
+                    <div style="margin-top:10px;padding:12px;border:1px dashed var(--primary);border-radius:10px;background:#fff;">
+                        <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:8px;">Adicionar valor à meta</div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Valor do aporte (R$)</label>
+                            <input type="number" id="aporteValorMeta-${meta.id}" step="0.01" min="0" placeholder="0,00">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Data do aporte</label>
+                            <input type="date" id="aporteDataMeta-${meta.id}" value="${dataPadrao}">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Observação</label>
+                            <input type="text" id="aporteObsMeta-${meta.id}" placeholder="Opcional">
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn-success btn-small" onclick="app.adicionarAporteMeta(${meta.id})">Salvar aporte</button>
+                            <button class="btn-warning btn-small" onclick="app.cancelarAporteMeta(${meta.id})">Cancelar</button>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+};
+
+app.atualizarMetasResume = function() {
+    const container = document.getElementById('metasResume');
+    if (!container) return;
+
+    this.sincronizarValorAtualMetas();
+
+    if (this.dados.metas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma meta registrada</div>';
+        return;
+    }
+
+    const agora = new Date();
+    const mes = agora.getMonth();
+    const ano = agora.getFullYear();
+
+    container.innerHTML = this.dados.metas.slice(0, 3).map(meta => {
+        let percentual;
+        let label;
+
+        if (meta.tipo === 'teto') {
+            const gasto = this.calcularGastoCategoriaNoMes(meta.categoria, mes, ano);
+            percentual = meta.teto > 0 ? Math.min((gasto / meta.teto) * 100, 100) : 0;
+            label = `${meta.nome} (teto)`;
+        } else {
+            percentual = meta.valorAlvo > 0 ? Math.min((this.getValorAtualMeta(meta.id) / meta.valorAlvo) * 100, 100) : 0;
+            label = meta.nome;
+        }
+
+        return `
+            <div style="background:none;border-left:4px solid #667eea;padding:8px;margin-bottom:10px;">
+                <div class="goal-header">
+                    <div class="goal-title" style="font-size:13px;">${label}</div>
+                    <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${percentual}%"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    app.ensureMetaUi();
+    app.atualizarModoFormularioMeta();
+});
+</script>
+<script>
+app.editingReceitaId = null;
+
+app.getBotaoSubmitReceita = function() {
+    return document.querySelector('#formReceita button[type="submit"]');
+};
+
+app.resetarFormularioReceita = function() {
+    const form = document.getElementById('formReceita');
+    if (form) form.reset();
+    this.editingReceitaId = null;
+    this.setarDataAtual();
+
+    const botao = this.getBotaoSubmitReceita();
+    if (botao) botao.textContent = 'Adicionar Receita';
+};
+
+app.updateReceita = function(id, dadosAtualizados) {
+    const receita = this.dados.receitas.find(item => String(item.id) === String(id));
+    if (!receita) return false;
+
+    Object.assign(receita, dadosAtualizados);
+    return true;
+};
+
+app.renderizarDependenciasReceita = function() {
+    this.atualizarDashboard();
+    this.listarReceitas('todas');
+    if (typeof this.atualizarRelatorio === 'function') this.atualizarRelatorio();
+    if (typeof this.renderComparativos === 'function') this.renderComparativos();
+};
+
+app.adicionarReceita = function(e) {
+    e.preventDefault();
+
+    const estavaEditando = this.editingReceitaId !== null;
+    const dadosReceita = {
+        data: document.getElementById('dataReceita').value,
+        descricao: document.getElementById('descricaoReceita').value,
+        valor: parseFloat(document.getElementById('valorReceita').value),
+        categoria: document.getElementById('categoriaReceita').value,
+        status: document.getElementById('statusReceita').value
+    };
+
+    if (estavaEditando) {
+        const atualizou = this.updateReceita(this.editingReceitaId, dadosReceita);
+        if (!atualizou) {
+            this.resetarFormularioReceita();
+            return;
+        }
+    } else {
+        this.dados.receitas.push({
+            id: Date.now(),
+            ...dadosReceita
+        });
+    }
+
+    this.salvarDados();
+    this.resetarFormularioReceita();
+    this.mostrarMensagem(
+        'mensagemSucesso',
+        estavaEditando ? 'Receita atualizada com sucesso!' : 'Receita adicionada com sucesso!'
+    );
+    this.renderizarDependenciasReceita();
+};
+
+app.editarReceita = function(id) {
+    const receita = this.dados.receitas.find(item => String(item.id) === String(id));
+    if (!receita) return;
+
+    this.editingReceitaId = id;
+    document.getElementById('dataReceita').value = receita.data;
+    document.getElementById('descricaoReceita').value = receita.descricao;
+    document.getElementById('valorReceita').value = receita.valor;
+    document.getElementById('categoriaReceita').value = receita.categoria;
+    document.getElementById('statusReceita').value = receita.status;
+
+    const botao = this.getBotaoSubmitReceita();
+    if (botao) botao.textContent = 'Atualizar Receita';
+
+    const secao = document.querySelector('[data-section="receitas"]');
+    if (secao) secao.click();
+};
+
+app.deletarReceita = function(id) {
+    if (!confirm('Deseja deletar esta receita?')) return;
+
+    this.dados.receitas = this.dados.receitas.filter(item => String(item.id) !== String(id));
+    if (String(this.editingReceitaId) === String(id)) this.resetarFormularioReceita();
+    this.salvarDados();
+    this.renderizarDependenciasReceita();
 };
 </script>
 </body>
