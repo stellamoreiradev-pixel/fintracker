@@ -730,7 +730,7 @@
                             <option value="fixa">Fixa</option>
                         </select>
                     </div>
-                    <button type="submit" class="btn-primary">Adicionar Despesa</button>
+                    <button type="submit" class="btn-primary" id="btnSubmitDespesa">Adicionar Despesa</button>
                 </form>
             </div>
 
@@ -1216,6 +1216,7 @@ const app = {
         categoriasReceita: [],
         categoriasDespesa: []
     },
+    editingExpenseId: null,
 
     // Default categories — used for first-run migration only
     _DEFAULT_CATS_RECEITA: [
@@ -3256,6 +3257,87 @@ const app = {
 };
 
 document.addEventListener('DOMContentLoaded', () => app.init());
+</script>
+<script>
+app.editingExpenseId = null;
+
+app.getBotaoSubmitDespesa = function() {
+    return document.querySelector('#formDespesa button[type="submit"]');
+};
+
+app.resetarFormularioDespesa = function() {
+    const form = document.getElementById('formDespesa');
+    if (form) form.reset();
+    this.editingExpenseId = null;
+    this.setarDataAtual();
+    const botao = this.getBotaoSubmitDespesa();
+    if (botao) botao.textContent = 'Adicionar Despesa';
+};
+
+app.adicionarDespesa = function(e) {
+    e.preventDefault();
+
+    const estavaEditando = this.editingExpenseId !== null;
+    const dadosDespesa = {
+        data: document.getElementById('dataDespesa').value,
+        descricao: document.getElementById('descricaoDespesa').value,
+        valor: parseFloat(document.getElementById('valorDespesa').value),
+        categoria: document.getElementById('categoriaDespesa').value,
+        tipo: document.getElementById('tipoDespesa').value
+    };
+
+    if (estavaEditando) {
+        const despesa = this.dados.despesas.find(d => d.id === this.editingExpenseId);
+        if (!despesa) {
+            this.resetarFormularioDespesa();
+            return;
+        }
+        Object.assign(despesa, dadosDespesa);
+    } else {
+        this.dados.despesas.push({
+            id: Date.now(),
+            ...dadosDespesa
+        });
+    }
+
+    this.salvarDados();
+    this.resetarFormularioDespesa();
+    this.mostrarMensagem(
+        'mensagemSucessoDespesa',
+        estavaEditando ? 'Despesa atualizada com sucesso!' : 'Despesa adicionada com sucesso!'
+    );
+    this.verificarAlertasTeto();
+    this.renderTetoCards();
+    this.atualizarDashboard();
+    this.listarDespesas('todas');
+};
+
+app.editarDespesa = function(id) {
+    const despesa = this.dados.despesas.find(d => d.id === id);
+    if (!despesa) return;
+
+    this.editingExpenseId = id;
+    document.getElementById('dataDespesa').value = despesa.data;
+    document.getElementById('descricaoDespesa').value = despesa.descricao;
+    document.getElementById('valorDespesa').value = despesa.valor;
+    document.getElementById('categoriaDespesa').value = despesa.categoria;
+    document.getElementById('tipoDespesa').value = despesa.tipo;
+
+    const botao = this.getBotaoSubmitDespesa();
+    if (botao) botao.textContent = 'Atualizar Despesa';
+
+    document.querySelector('[data-section="despesas"]').click();
+};
+
+app.deletarDespesa = function(id) {
+    if (!confirm('Deseja deletar esta despesa?')) return;
+
+    this.dados.despesas = this.dados.despesas.filter(d => d.id !== id);
+    if (this.editingExpenseId === id) this.resetarFormularioDespesa();
+    this.salvarDados();
+    this.atualizarDashboard();
+    this.listarDespesas('todas');
+};
 </script>
 </body>
 </html>
