@@ -458,6 +458,35 @@
         .alerta-inline.a90 { background: #ffedd5; color: #7c2d12; border-left: 3px solid #ea580c; }
         .alerta-inline.a100 { background: #fee2e2; color: #7f1d1d; border-left: 3px solid var(--danger); }
 
+        /* ====== CATEGORIAS ====== */
+        .cat-section-title {
+            font-size: 12px; font-weight: 700; text-transform: uppercase;
+            letter-spacing: 0.5px; color: var(--gray-400); margin-bottom: 12px;
+            padding-bottom: 8px; border-bottom: 1px solid var(--gray-200);
+        }
+        .cat-list { display: flex; flex-direction: column; gap: 7px; max-height: 420px; overflow-y: auto; }
+        .cat-row {
+            display: flex; align-items: center; gap: 10px;
+            background: var(--gray-50); border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-sm); padding: 9px 12px;
+            transition: background 0.15s;
+        }
+        .cat-row:hover { background: var(--primary-light); border-color: var(--primary); }
+        .cat-row.inactive { opacity: 0.45; }
+        .cat-emoji { font-size: 18px; flex-shrink: 0; }
+        .cat-name { flex: 1; font-size: 13.5px; font-weight: 600; color: var(--gray-900); }
+        .cat-id { font-size: 11px; color: var(--gray-400); font-family: monospace; }
+        .cat-usage { font-size: 11px; color: var(--gray-400); min-width: 55px; text-align: right; }
+        .cat-actions { display: flex; gap: 5px; flex-shrink: 0; }
+        .cat-add-form {
+            display: flex; gap: 8px; margin-bottom: 14px; flex-wrap: wrap;
+        }
+        .cat-add-form input[type="text"] { flex: 1; min-width: 130px; padding: 8px 11px; font-size: 13px; }
+        .cat-add-form input[type="text"].emoji-input { max-width: 70px; text-align: center; font-size: 18px; flex: none; }
+        .cat-add-form button { flex-shrink: 0; }
+        .cat-edit-input { flex: 1; padding: 4px 8px; border: 1.5px solid var(--primary); border-radius: 5px; font-size: 13px; font-weight: 600; }
+        .cat-empty { text-align: center; padding: 24px; color: var(--gray-400); font-size: 13px; }
+
         @media (max-width: 768px) {
             .two-column, .main-content, .summary, .invoice-header { grid-template-columns: 1fr; }
             header { flex-direction: column; padding: 14px 16px; }
@@ -563,6 +592,7 @@
             <button class="nav-btn" data-section="metas">🎯 Metas</button>
             <button class="nav-btn" data-section="relatorios">📋 Relatórios</button>
             <button class="nav-btn" data-section="comparativos">📈 Comparativos</button>
+            <button class="nav-btn" data-section="categorias">🏷️ Categorias</button>
             <button class="nav-btn" data-section="backup">💾 Backup</button>
         </div>
     </header>
@@ -641,11 +671,6 @@
                         <label>Categoria</label>
                         <select id="categoriaReceita" required>
                             <option value="">Selecionar...</option>
-                            <option value="vivamais">Viva Mais</option>
-                            <option value="bayeux">Dore Bayeux</option>
-                            <option value="topvida">Top Vida</option>
-                            <option value="outro">Prestação de Serviço Avulsa</option>
-                            <option value="outro">Outro</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -696,23 +721,6 @@
                         <label>Categoria</label>
                         <select id="categoriaDespesa" required>
                             <option value="">Selecionar...</option>
-                            <option value="ifood">🍔 Ifood</option>
-                            <option value="mercado">🏪 Mercado</option>
-                            <option value="padaria">🍞 Padaria</option>
-                            <option value="transporte">🚗 Carro</option>
-                            <option value="transporte">⛽ Gasolina</option>
-                            <option value="moradia">🏠 Moradia</option>
-                            <option value="internet">📡 Internet/Telefone</option>
-                            <option value="energia">⚡ Energia/Água</option>
-                            <option value="saude">🏥 Saúde</option>
-                            <option value="educacao">📚 Educação</option>
-                            <option value="lazer">🎮 Lazer</option>
-                            <option value="eletronicos">💻 Eletrônicos</option>
-                            <option value="viagem">✈️ Viagem</option>
-                            <option value="casa">🏡 Casa</option>
-                            <option value="impostos">📋 Impostos</option>
-                            <option value="ferramentas">🛠️ Ferramentas</option>
-                            <option value="outro">📦 Outro</option>
                         </select>
                     </div>
                     <div class="form-group">
@@ -814,14 +822,6 @@
                                 <label>Categoria</label>
                                 <select id="categoriaCompra" required>
                                     <option value="">Selecionar...</option>
-                                    <option value="eletronicos">💻 Eletrônicos</option>
-                                    <option value="alimentacao">🍔 Alimentação</option>
-                                    <option value="viagem">✈️ Viagem</option>
-                                    <option value="saude">🏥 Saúde</option>
-                                    <option value="educacao">📚 Educação</option>
-                                    <option value="lazer">🎮 Lazer</option>
-                                    <option value="casa">🏡 Casa</option>
-                                    <option value="outro">📦 Outro</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -913,20 +913,6 @@
                                 <label>Categoria de Gastos</label>
                                 <select id="categoriaTetoForm" required>
                                     <option value="">Selecionar...</option>
-                                    <option value="alimentacao">🍔 Alimentação</option>
-                                    <option value="transporte">🚗 Transporte</option>
-                                    <option value="moradia">🏠 Moradia</option>
-                                    <option value="internet">📡 Internet/Telefone</option>
-                                    <option value="energia">⚡ Energia/Água</option>
-                                    <option value="saude">🏥 Saúde</option>
-                                    <option value="educacao">📚 Educação</option>
-                                    <option value="lazer">🎮 Lazer</option>
-                                    <option value="eletronicos">💻 Eletrônicos</option>
-                                    <option value="viagem">✈️ Viagem</option>
-                                    <option value="casa">🏡 Casa</option>
-                                    <option value="impostos">📋 Impostos</option>
-                                    <option value="ferramentas">🛠️ Ferramentas</option>
-                                    <option value="outro">📦 Outro</option>
                                 </select>
                             </div>
                             <div class="form-group">
@@ -1003,7 +989,7 @@
                                 <div class="form-group">
                                     <label>Categoria de Gastos</label>
                                     <select id="categoriaTetoMeta">
-                                        <option value="alimentacao">🍔 Alimentação</option>
+                                        <option value="">Selecionar...</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
@@ -1081,6 +1067,42 @@
             </div>
         </div>
     </section>
+    <!-- CATEGORIAS -->
+    <section id="categorias" class="section">
+        <div class="two-column">
+            <!-- RECEITA -->
+            <div class="card">
+                <h2>💵 Categorias de Receita</h2>
+                <div class="success-message" id="msgCatReceita"></div>
+                <div class="error-message" id="msgCatReceitaErro"></div>
+                <div class="cat-add-form">
+                    <input type="text" id="novaCatReceitaEmoji" class="emoji-input" placeholder="💼" maxlength="2" title="Emoji">
+                    <input type="text" id="novaCatReceitaNome" placeholder="Nome da categoria..." maxlength="40">
+                    <button class="btn-primary" style="width:auto;padding:9px 16px;" onclick="app.adicionarCategoria('receita')">+ Adicionar</button>
+                </div>
+                <div class="cat-section-title">Categorias ativas e inativas</div>
+                <div class="cat-list" id="listaCatReceita">
+                    <div class="cat-empty">Carregando...</div>
+                </div>
+            </div>
+            <!-- DESPESA -->
+            <div class="card">
+                <h2>📤 Categorias de Despesa</h2>
+                <div class="success-message" id="msgCatDespesa"></div>
+                <div class="error-message" id="msgCatDespesaErro"></div>
+                <div class="cat-add-form">
+                    <input type="text" id="novaCatDespesaEmoji" class="emoji-input" placeholder="🛍️" maxlength="2" title="Emoji">
+                    <input type="text" id="novaCatDespesaNome" placeholder="Nome da categoria..." maxlength="40">
+                    <button class="btn-primary" style="width:auto;padding:9px 16px;" onclick="app.adicionarCategoria('despesa')">+ Adicionar</button>
+                </div>
+                <div class="cat-section-title">Categorias ativas e inativas</div>
+                <div class="cat-list" id="listaCatDespesa">
+                    <div class="cat-empty">Carregando...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- BACKUP -->
     <section id="backup" class="section">
         <div class="card" style="max-width:600px;margin:0 auto;">
@@ -1190,8 +1212,35 @@ const app = {
         cartoes: [],
         compras: [],
         parcelas: [],
-        faturasPagas: {}
+        faturasPagas: {},
+        categoriasReceita: [],
+        categoriasDespesa: []
     },
+
+    // Default categories — used for first-run migration only
+    _DEFAULT_CATS_RECEITA: [
+        { id: 'freelance',    nome: 'Freelance',             emoji: '💼', ativo: true },
+        { id: 'consultoria',  nome: 'Consultoria',           emoji: '🧠', ativo: true },
+        { id: 'venda',        nome: 'Venda de Produto',      emoji: '🛒', ativo: true },
+        { id: 'prestacao',    nome: 'Prestação de Serviço',  emoji: '⚙️', ativo: true },
+        { id: 'outro',        nome: 'Outro',                 emoji: '📦', ativo: true }
+    ],
+    _DEFAULT_CATS_DESPESA: [
+        { id: 'alimentacao',  nome: 'Alimentação',       emoji: '🍔', ativo: true },
+        { id: 'transporte',   nome: 'Transporte',        emoji: '🚗', ativo: true },
+        { id: 'moradia',      nome: 'Moradia',           emoji: '🏠', ativo: true },
+        { id: 'internet',     nome: 'Internet/Telefone', emoji: '📡', ativo: true },
+        { id: 'energia',      nome: 'Energia/Água',      emoji: '⚡', ativo: true },
+        { id: 'saude',        nome: 'Saúde',             emoji: '🏥', ativo: true },
+        { id: 'educacao',     nome: 'Educação',          emoji: '📚', ativo: true },
+        { id: 'lazer',        nome: 'Lazer',             emoji: '🎮', ativo: true },
+        { id: 'eletronicos',  nome: 'Eletrônicos',       emoji: '💻', ativo: true },
+        { id: 'viagem',       nome: 'Viagem',            emoji: '✈️', ativo: true },
+        { id: 'casa',         nome: 'Casa',              emoji: '🏡', ativo: true },
+        { id: 'impostos',     nome: 'Impostos',          emoji: '📋', ativo: true },
+        { id: 'ferramentas',  nome: 'Ferramentas',       emoji: '🛠️', ativo: true },
+        { id: 'outro',        nome: 'Outro',             emoji: '📦', ativo: true }
+    ],
 
     // ====================== INIT ======================
     init() {
@@ -1212,6 +1261,7 @@ const app = {
         if (mesCompEl) mesCompEl.value = mesAtualStr;
         this.renderTetoCards();
         this.verificarAlertasTeto();
+        this.popularTodosSelects();
     },
 
     carregarDados() {
@@ -1239,13 +1289,20 @@ const app = {
             this.dados = JSON.parse(dadosUnif);
             if (!this.dados.tetos) this.dados.tetos = [];
         }
+        // Migration: ensure categories exist (first-run or upgrade)
+        if (!this.dados.categoriasReceita || this.dados.categoriasReceita.length === 0)
+            this.dados.categoriasReceita = JSON.parse(JSON.stringify(this._DEFAULT_CATS_RECEITA));
+        if (!this.dados.categoriasDespesa || this.dados.categoriasDespesa.length === 0)
+            this.dados.categoriasDespesa = JSON.parse(JSON.stringify(this._DEFAULT_CATS_DESPESA));
     },
 
     salvarDados() {
         if (!this.dados.tetos) this.dados.tetos = [];
+        if (!this.dados.categoriasReceita) this.dados.categoriasReceita = JSON.parse(JSON.stringify(this._DEFAULT_CATS_RECEITA));
+        if (!this.dados.categoriasDespesa) this.dados.categoriasDespesa = JSON.parse(JSON.stringify(this._DEFAULT_CATS_DESPESA));
+        if (!this.dados.tetos) this.dados.tetos = [];
         localStorage.setItem('financeiroUnificado', JSON.stringify(this.dados));
         // Manter compatibilidade com chaves antigas
-        if (this.dados.tetos === undefined) this.dados.tetos = [];
         localStorage.setItem('financasApp', JSON.stringify({
             receitas: this.dados.receitas,
             despesas: this.dados.despesas,
@@ -1331,6 +1388,7 @@ const app = {
         if (id === 'dashboard') this.atualizarDashboard();
         if (id === 'metas') { this.listarMetas(); this.renderTetoCards(); this.renderCentralAlertas(); }
         if (id === 'comparativos') this.renderComparativos();
+        if (id === 'categorias') this.renderCategorias();
     },
 
     mudarSubSecao(id, btn) {
@@ -1454,7 +1512,7 @@ const app = {
             <div class="list-item expense">
                 <div class="list-item-content">
                     <div class="list-item-title">${d.descricao}</div>
-                    <div class="list-item-meta">${this.formatarData(d.data)} • ${CATEGORIAS_EMOJI[d.categoria] || ''} ${d.categoria} • ${d.tipo}</div>
+                    <div class="list-item-meta">${this.formatarData(d.data)} • ${app._resolveEmoji(d.categoria)} ${d.categoria} • ${d.tipo}</div>
                 </div>
                 <div class="list-item-value expense">- R$ ${this.formatarMoeda(d.valor)}</div>
                 <div class="list-actions">
@@ -1536,7 +1594,7 @@ const app = {
                 return `
                     <div class="goal-item">
                         <div class="goal-header">
-                            <div class="goal-title">${CATEGORIAS_EMOJI[m.categoria] || ''} ${m.nome} <span class="teto-badge ${badgeCls}">${badgeLabel}</span></div>
+                            <div class="goal-title">${app._resolveEmoji(m.categoria)} ${m.nome} <span class="teto-badge ${badgeCls}">${badgeLabel}</span></div>
                             <div class="goal-percentage">${percentual.toFixed(0)}%</div>
                         </div>
                         <div class="progress-bar">
@@ -1728,7 +1786,7 @@ const app = {
                 const pct = (valor / maxValor) * 100;
                 return `
                     <div class="chart-bar">
-                        <div class="chart-label">${CATEGORIAS_EMOJI[cat] || '•'} ${cat}</div>
+                        <div class="chart-label">${app._resolveEmoji(cat)} ${cat}</div>
                         <div class="chart-bar-bg">
                             <div class="chart-bar-fill" style="width:${pct}%"></div>
                         </div>
@@ -1947,7 +2005,7 @@ const app = {
                     <div style="width:100%;display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
                         <div>
                             <div class="list-item-title">${comp.descricao}</div>
-                            <div class="list-item-meta">${cartao ? cartao.nome : '?'} • ${CATEGORIAS_EMOJI[comp.categoria] || ''} ${comp.categoria} • ${this.formatarData(comp.dataCompra)}</div>
+                            <div class="list-item-meta">${cartao ? cartao.nome : '?'} • ${app._resolveEmoji(comp.categoria)} ${comp.categoria} • ${this.formatarData(comp.dataCompra)}</div>
                         </div>
                         <div class="list-item-value card-val">R$ ${this.formatarMoeda(comp.valorTotal)}</div>
                     </div>
@@ -2040,7 +2098,7 @@ const app = {
                                 <div class="list-item-cc">
                                     <div class="list-item-content">
                                         <div class="list-item-title">${c.descricao}</div>
-                                        <div class="list-item-meta">${CATEGORIAS_EMOJI[c.categoria] || ''} ${c.categoria} • Parcela ${c.numero}/${c.totalParcelas}</div>
+                                        <div class="list-item-meta">${app._resolveEmoji(c.categoria)} ${c.categoria} • Parcela ${c.numero}/${c.totalParcelas}</div>
                                     </div>
                                     <div class="list-item-value card-val">R$ ${this.formatarMoeda(c.valor)}</div>
                                 </div>
@@ -2133,7 +2191,7 @@ const app = {
                 const pct = (valor / maxValor) * 100;
                 return `
                     <div class="chart-bar">
-                        <div class="chart-label">${CATEGORIAS_EMOJI[cat] || '•'} ${cat}</div>
+                        <div class="chart-label">${app._resolveEmoji(cat)} ${cat}</div>
                         <div class="chart-bar-bg">
                             <div class="chart-bar-fill" style="width:${pct}%"></div>
                         </div>
@@ -2222,7 +2280,7 @@ const app = {
                 const pct = (valor / maxValor) * 100;
                 return `
                     <div class="chart-bar">
-                        <div class="chart-label">${CATEGORIAS_EMOJI[cat] || '•'} ${cat}</div>
+                        <div class="chart-label">${app._resolveEmoji(cat)} ${cat}</div>
                         <div class="chart-bar-bg"><div class="chart-bar-fill" style="width:${pct}%"></div></div>
                         <div class="chart-value">R$ ${this.formatarMoeda(valor)}</div>
                     </div>
@@ -2451,7 +2509,7 @@ const app = {
             <div class="teto-card ${borderClass}">
                 <div class="teto-card-header">
                     <div>
-                        <div class="teto-card-title">${CATEGORIAS_EMOJI[t.categoria] || ''} ${t.nome}</div>
+                        <div class="teto-card-title">${app._resolveEmoji(t.categoria)} ${t.nome}</div>
                         <div class="teto-card-cat">${tipoLabel} • ${t.categoria} <span class="teto-badge ${badgeCls}">${badgeLabel}</span></div>
                     </div>
                     <div class="teto-card-pct ${pctClass}">${Math.min(s.percentual, 999).toFixed(0)}%</div>
@@ -2580,7 +2638,7 @@ const app = {
             return `<div class="alerta-inline ${cls}" style="margin-bottom:8px;">
                 <span style="font-size:18px;">${icon}</span>
                 <div>
-                    <div style="font-weight:700;font-size:13px;">${CATEGORIAS_EMOJI[t.categoria] || ''} ${t.nome}</div>
+                    <div style="font-weight:700;font-size:13px;">${app._resolveEmoji(t.categoria)} ${t.nome}</div>
                     <div style="font-size:12px;font-weight:500;opacity:0.8;margin-top:2px;">${msg}</div>
                     <div class="progress-bar" style="margin-top:6px;height:6px;">
                         <div class="progress-fill ${s.status === 'over' ? 'over' : ''}" style="width:${Math.min(s.percentual,100)}%;${s.status==='warn90'?'background:linear-gradient(90deg,#ea580c,#f97316)':s.status==='warn70'?'background:linear-gradient(90deg,#d69e2e,#fbbf24)':''}"></div>
@@ -2628,14 +2686,25 @@ const app = {
 
     // ====================== COMPARATIVOS ======================
 
-    // Receita categories as used in the app
-    _CATS_RECEITA: ['freelance', 'consultoria', 'venda', 'prestacao', 'outro'],
-    _CATS_RECEITA_LABEL: {
-        freelance: 'Freelance', consultoria: 'Consultoria',
-        venda: 'Venda de Produto', prestacao: 'Prestação de Serviço', outro: 'Outro'
+    // Dynamic category helpers — read from dados at call time
+    _getCatsReceita() {
+        return (this.dados.categoriasReceita || this._DEFAULT_CATS_RECEITA).filter(c => c.ativo !== false);
     },
-    _CATS_RECEITA_EMOJI: {
-        freelance: '💼', consultoria: '🧠', venda: '🛒', prestacao: '⚙️', outro: '📦'
+    _getCatsDespesa() {
+        return (this.dados.categoriasDespesa || this._DEFAULT_CATS_DESPESA).filter(c => c.ativo !== false);
+    },
+    _getCatReceitaById(id) {
+        const all = this.dados.categoriasReceita || this._DEFAULT_CATS_RECEITA;
+        return all.find(c => c.id === id) || { id, nome: id, emoji: '📦' };
+    },
+    _getCatDespesaById(id) {
+        const all = this.dados.categoriasDespesa || this._DEFAULT_CATS_DESPESA;
+        return all.find(c => c.id === id) || { id, nome: id, emoji: '📦' };
+    },
+    _resolveEmoji(id) {
+        const cats = [...(this.dados.categoriasReceita||[]), ...(this.dados.categoriasDespesa||[])];
+        const found = cats.find(c => c.id === id);
+        return (found && found.emoji) ? found.emoji : (CATEGORIAS_EMOJI[id] || '📦');
     },
 
     // Sum received receitas for a category in a given month/year
@@ -2673,9 +2742,10 @@ const app = {
         let mesPrev = mes - 1, anoPrev = ano;
         if (mesPrev < 0) { mesPrev = 11; anoPrev--; }
 
-        const cats = this._CATS_RECEITA;
-        const label = c => this._CATS_RECEITA_LABEL[c] || c;
-        const emoji = c => this._CATS_RECEITA_EMOJI[c] || '📦';
+        const catObjs = this._getCatsReceita();
+        const cats = catObjs.map(c => c.id);
+        const label = c => { const o = this._getCatReceitaById(c); return o ? o.nome : c; };
+        const emoji = c => { const o = this._getCatReceitaById(c); return (o && o.emoji) ? o.emoji : '📦'; };
         const fmt = v => this.formatarMoeda(v);
 
         // --- Compute data for all categories ---
@@ -2931,6 +3001,172 @@ const app = {
                 </div>
             </div>`).join('');
         }
+    },
+
+    // ====================== CATEGORIAS ======================
+
+    // Populate all category selects from dados
+    popularTodosSelects() {
+        const cats = this.dados.categoriasDespesa || this._DEFAULT_CATS_DESPESA;
+        const catsR = this.dados.categoriasReceita || this._DEFAULT_CATS_RECEITA;
+        const ativas  = cats.filter(c => c.ativo !== false);
+        const ativasR = catsR.filter(c => c.ativo !== false);
+
+        const optsD = '<option value="">Selecionar...</option>' +
+            ativas.map(c => `<option value="${c.id}">${c.emoji || ''} ${c.nome}</option>`).join('');
+        const optsR = '<option value="">Selecionar...</option>' +
+            ativasR.map(c => `<option value="${c.id}">${c.emoji || ''} ${c.nome}</option>`).join('');
+
+        // Receita select
+        const selR = document.getElementById('categoriaReceita');
+        if (selR) { const v = selR.value; selR.innerHTML = optsR; selR.value = v; }
+
+        // Despesa selects
+        ['categoriaDespesa', 'categoriaTetoForm', 'categoriaTetoMeta', 'categoriaCompra'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { const v = el.value; el.innerHTML = optsD; el.value = v; }
+        });
+    },
+
+    renderCategorias() {
+        this._renderCatList('receita');
+        this._renderCatList('despesa');
+    },
+
+    _renderCatList(tipo) {
+        const containerId = tipo === 'receita' ? 'listaCatReceita' : 'listaCatDespesa';
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const lista = tipo === 'receita'
+            ? (this.dados.categoriasReceita || this._DEFAULT_CATS_RECEITA)
+            : (this.dados.categoriasDespesa || this._DEFAULT_CATS_DESPESA);
+
+        if (lista.length === 0) {
+            container.innerHTML = '<div class="cat-empty">Nenhuma categoria cadastrada</div>';
+            return;
+        }
+
+        // Count usage per category id
+        const usageMap = {};
+        if (tipo === 'receita') {
+            this.dados.receitas.forEach(r => { usageMap[r.categoria] = (usageMap[r.categoria] || 0) + 1; });
+        } else {
+            this.dados.despesas.forEach(d => { usageMap[d.categoria] = (usageMap[d.categoria] || 0) + 1; });
+            this.dados.compras.forEach(c => { usageMap[c.categoria] = (usageMap[c.categoria] || 0) + 1; });
+            this.dados.tetos.forEach(t => { if (t.status === 'ativa') usageMap[t.categoria] = (usageMap[t.categoria] || 0) + 1; });
+        }
+
+        container.innerHTML = lista.map(cat => {
+            const uso = usageMap[cat.id] || 0;
+            const inativo = cat.ativo === false;
+            return `<div class="cat-row ${inativo ? 'inactive' : ''}" id="cat-row-${tipo}-${cat.id}">
+                <div class="cat-emoji">${cat.emoji || '📦'}</div>
+                <div class="cat-name" id="cat-name-display-${tipo}-${cat.id}">${cat.nome}</div>
+                <div class="cat-id">${cat.id}</div>
+                <div class="cat-usage">${uso > 0 ? `${uso} uso(s)` : ''}</div>
+                <div class="cat-actions">
+                    <button class="btn-warning btn-small" onclick="app.editarCategoria('${tipo}','${cat.id}')">Editar</button>
+                    <button class="btn-${inativo ? 'success' : 'warning'} btn-small"
+                        onclick="app.toggleCategoria('${tipo}','${cat.id}')">
+                        ${inativo ? 'Ativar' : 'Desativar'}
+                    </button>
+                    <button class="btn-danger btn-small"
+                        onclick="app.excluirCategoria('${tipo}','${cat.id}',${uso})"
+                        ${uso > 0 ? 'title="Possui registros vinculados"' : ''}>Excluir</button>
+                </div>
+            </div>`;
+        }).join('');
+    },
+
+    adicionarCategoria(tipo) {
+        const emojiId = tipo === 'receita' ? 'novaCatReceitaEmoji' : 'novaCatDespesaEmoji';
+        const nomeId  = tipo === 'receita' ? 'novaCatReceitaNome'  : 'novaCatDespesaNome';
+        const msgOkId  = tipo === 'receita' ? 'msgCatReceita'      : 'msgCatDespesa';
+        const msgErrId = tipo === 'receita' ? 'msgCatReceitaErro'  : 'msgCatDespesaErro';
+
+        const emoji = (document.getElementById(emojiId)?.value || '📦').trim() || '📦';
+        const nome  = (document.getElementById(nomeId)?.value || '').trim();
+        if (!nome) { this.mostrarErro(msgErrId, 'Informe o nome da categoria.'); return; }
+
+        const lista = tipo === 'receita'
+            ? (this.dados.categoriasReceita || (this.dados.categoriasReceita = []))
+            : (this.dados.categoriasDespesa || (this.dados.categoriasDespesa = []));
+
+        // Generate id from name (slug)
+        let baseId = nome.toLowerCase()
+            .normalize('NFD').replace(/[̀-ͯ]/g, '')
+            .replace(/[^a-z0-9]/g, '_').replace(/_+/g, '_').replace(/^_|_$/g, '');
+        let id = baseId;
+        let n = 2;
+        while (lista.find(c => c.id === id)) { id = baseId + '_' + n++; }
+
+        lista.push({ id, nome, emoji, ativo: true });
+        this.salvarDados();
+        document.getElementById(emojiId).value = '';
+        document.getElementById(nomeId).value = '';
+        this.mostrarMensagem(msgOkId, `✓ Categoria "${nome}" adicionada.`);
+        this._renderCatList(tipo);
+        this.popularTodosSelects();
+    },
+
+    editarCategoria(tipo, id) {
+        const rowId = `cat-row-${tipo}-${id}`;
+        const row = document.getElementById(rowId);
+        const displayEl = document.getElementById(`cat-name-display-${tipo}-${id}`);
+        if (!row || !displayEl) return;
+
+        const lista = tipo === 'receita' ? this.dados.categoriasReceita : this.dados.categoriasDespesa;
+        const cat = lista?.find(c => c.id === id);
+        if (!cat) return;
+
+        // Replace name display with inline input
+        displayEl.innerHTML = `<input class="cat-edit-input" id="cat-edit-input-${tipo}-${id}"
+            value="${cat.nome}" onkeydown="if(event.key==='Enter')app.salvarEdicaoCategoria('${tipo}','${id}');if(event.key==='Escape')app._renderCatList('${tipo}')">
+            <button class="btn-success btn-small" style="margin-left:6px;" onclick="app.salvarEdicaoCategoria('${tipo}','${id}')">✓</button>
+            <button class="btn-secondary btn-small" onclick="app._renderCatList('${tipo}')">✕</button>`;
+        displayEl.querySelector('input').focus();
+    },
+
+    salvarEdicaoCategoria(tipo, id) {
+        const input = document.getElementById(`cat-edit-input-${tipo}-${id}`);
+        if (!input) return;
+        const novoNome = input.value.trim();
+        if (!novoNome) return;
+        const lista = tipo === 'receita' ? this.dados.categoriasReceita : this.dados.categoriasDespesa;
+        const cat = lista?.find(c => c.id === id);
+        if (cat) {
+            cat.nome = novoNome;
+            this.salvarDados();
+            this.popularTodosSelects();
+        }
+        this._renderCatList(tipo);
+    },
+
+    toggleCategoria(tipo, id) {
+        const lista = tipo === 'receita' ? this.dados.categoriasReceita : this.dados.categoriasDespesa;
+        const cat = lista?.find(c => c.id === id);
+        if (cat) {
+            cat.ativo = cat.ativo === false ? true : false;
+            this.salvarDados();
+            this._renderCatList(tipo);
+            this.popularTodosSelects();
+        }
+    },
+
+    excluirCategoria(tipo, id, uso) {
+        if (uso > 0) {
+            alert(`Esta categoria possui ${uso} registro(s) vinculado(s) e não pode ser excluída. Desative-a caso não queira usá-la.`);
+            return;
+        }
+        if (!confirm(`Excluir a categoria? Esta ação não pode ser desfeita.`)) return;
+        if (tipo === 'receita') {
+            this.dados.categoriasReceita = (this.dados.categoriasReceita || []).filter(c => c.id !== id);
+        } else {
+            this.dados.categoriasDespesa = (this.dados.categoriasDespesa || []).filter(c => c.id !== id);
+        }
+        this.salvarDados();
+        this._renderCatList(tipo);
+        this.popularTodosSelects();
     },
 
     // ====================== BACKUP ======================
