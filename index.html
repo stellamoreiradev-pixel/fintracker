@@ -3925,5 +3925,705 @@ app.deletarReceita = function(id) {
     this.renderizarDependenciasReceita();
 };
 </script>
+<script>
+app.META_TIPOS_PLANEJAMENTO = {
+    reserva_emergencia: { label: 'Reserva de Emergência', icon: '🛟' },
+    viagem: { label: 'Viagem', icon: '✈️' },
+    impostos: { label: 'Impostos', icon: '🧾' },
+    investimento: { label: 'Investimento', icon: '📈' },
+    personalizada: { label: 'Personalizada', icon: '🎯' }
+};
+
+app.META_PRIORIDADES = {
+    alta: { label: 'Alta', bg: '#fed7d7', color: '#9b2c2c' },
+    media: { label: 'Média', bg: '#feebc8', color: '#9c4221' },
+    baixa: { label: 'Baixa', bg: '#bee3f8', color: '#2a4365' }
+};
+
+app.eMetaTeto = function(meta) {
+    return !!meta && meta.tipo === 'teto';
+};
+
+app.arredondarMetaValor = function(valor) {
+    return Math.round((Number(valor) || 0) * 100) / 100;
+};
+
+app.getMetaPlanejamentoInfo = function(tipo) {
+    return this.META_TIPOS_PLANEJAMENTO[tipo] || this.META_TIPOS_PLANEJAMENTO.personalizada;
+};
+
+app.getMetaPrioridadeInfo = function(prioridade) {
+    return this.META_PRIORIDADES[prioridade] || this.META_PRIORIDADES.media;
+};
+
+app.calcularValorAtualMeta = function(metaOrId) {
+    const metaId = typeof metaOrId === 'object' ? metaOrId.id : metaOrId;
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    return this.arredondarMetaValor(
+        this.dados.aportesMeta
+            .filter(aporte => String(aporte.metaId) === String(metaId))
+            .reduce((sum, aporte) => sum + (parseFloat(aporte.valor) || 0), 0)
+    );
+};
+
+app.getValorAtualMeta = function(metaOrId) {
+    return this.calcularValorAtualMeta(metaOrId);
+};
+
+app.normalizarMetaFinanceira = function(meta) {
+    if (!meta || this.eMetaTeto(meta)) return false;
+
+    let changed = false;
+
+    if (meta.valorObjetivo === undefined) {
+        meta.valorObjetivo = this.arredondarMetaValor(meta.valorAlvo);
+        changed = true;
+    }
+
+    if (meta.valorAlvo !== meta.valorObjetivo) {
+        meta.valorAlvo = meta.valorObjetivo;
+        changed = true;
+    }
+
+    if (!this.META_TIPOS_PLANEJAMENTO[meta.tipo]) {
+        meta.tipo = 'personalizada';
+        changed = true;
+    }
+
+    if (!this.META_PRIORIDADES[meta.prioridade]) {
+        meta.prioridade = 'media';
+        changed = true;
+    }
+
+    if (!meta.criadoEm) {
+        const primeiroAporte = this.getAportesMeta(meta.id).slice(-1)[0];
+        meta.criadoEm = primeiroAporte?.data || new Date().toISOString().split('T')[0];
+        changed = true;
+    }
+
+    const valorAtual = this.calcularValorAtualMeta(meta.id);
+    if ((parseFloat(meta.valorAtual) || 0) !== valorAtual) {
+        meta.valorAtual = valorAtual;
+        changed = true;
+    }
+
+    return changed;
+};
+
+app.normalizarMetasFinanceiras = function() {
+    if (!Array.isArray(this.dados.metas)) this.dados.metas = [];
+
+    let changed = false;
+    this.dados.metas.forEach(meta => {
+        if (this.normalizarMetaFinanceira(meta)) changed = true;
+    });
+
+    return changed;
+};
+
+app.sincronizarValorAtualMetas = function() {
+    this.normalizarMetasFinanceiras();
+};
+
+app.calcularMesesRestantesMeta = function(dataLimite) {
+    if (!dataLimite) return 0;
+
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+
+    const limite = new Date(`${dataLimite}T00:00:00`);
+    if (Number.isNaN(limite.getTime())) return 0;
+    if (limite < hoje) return 0;
+
+    let meses = (limite.getFullYear() - hoje.getFullYear()) * 12 + (limite.getMonth() - hoje.getMonth());
+    if (limite.getDate() >= hoje.getDate()) meses += 1;
+
+    return Math.max(meses, 0);
+};
+
+app.calcularAporteSugerido = function(metaOrId) {
+    const meta = typeof metaOrId === 'object'
+        ? metaOrId
+        : this.dados.metas.find(item => String(item.id) === String(metaOrId));
+
+    if (!meta || this.eMetaTeto(meta)) return null;
+
+    const valorObjetivo = this.arredondarMetaValor(meta.valorObjetivo ?? meta.valorAlvo);
+    const valorAtual = this.calcularValorAtualMeta(meta.id);
+    const valorRestante = this.arredondarMetaValor(valorObjetivo - valorAtual);
+    const hoje = new Date();
+    hoje.setHours(0, 0, 0, 0);
+    const limite = meta.dataLimite ? new Date(`${meta.dataLimite}T00:00:00`) : null;
+    const limiteValida = limite && !Number.isNaN(limite.getTime());
+    const atrasada = !!limiteValida && limite < hoje && valorRestante > 0;
+
+    if (valorRestante <= 0) {
+        return {
+            status: 'concluida',
+            valorAtual,
+            valorObjetivo,
+            valorRestante: 0,
+            mesesRestantes: 0,
+            aporteSugeridoMensal: 0,
+            mensagem: 'Meta concluída 🎉'
+        };
+    }
+
+    if (!meta.dataLimite) {
+        return {
+            status: 'sem_data',
+            valorAtual,
+            valorObjetivo,
+            valorRestante,
+            mesesRestantes: 0,
+            aporteSugeridoMensal: null,
+            mensagem: 'Defina uma data limite para receber a sugestão automática de aporte mensal.'
+        };
+    }
+
+    if (atrasada) {
+        return {
+            status: 'atrasada',
+            valorAtual,
+            valorObjetivo,
+            valorRestante,
+            mesesRestantes: 0,
+            aporteSugeridoMensal: null,
+            mensagem: 'Prazo encerrado. Revise a data limite ou aumente seus aportes para retomar o plano.'
+        };
+    }
+
+    const mesesRestantes = this.calcularMesesRestantesMeta(meta.dataLimite);
+    if (mesesRestantes <= 0) {
+        return {
+            status: 'sem_calculo',
+            valorAtual,
+            valorObjetivo,
+            valorRestante,
+            mesesRestantes,
+            aporteSugeridoMensal: null,
+            mensagem: 'Não foi possível calcular o aporte mensal com o prazo informado.'
+        };
+    }
+
+    const aporteSugeridoMensal = this.arredondarMetaValor(valorRestante / mesesRestantes);
+    const prazoFormatado = new Date(`${meta.dataLimite}T00:00:00`).toLocaleDateString('pt-BR', {
+        month: 'long',
+        year: 'numeric'
+    });
+
+    return {
+        status: 'ativa',
+        valorAtual,
+        valorObjetivo,
+        valorRestante,
+        mesesRestantes,
+        aporteSugeridoMensal,
+        mensagem: `Para atingir essa meta até ${prazoFormatado}, você precisa aportar R$ ${this.formatarMoeda(aporteSugeridoMensal)} por mês.`
+    };
+};
+
+app.atualizarMeta = function(id, dadosMeta) {
+    const meta = this.dados.metas.find(item => String(item.id) === String(id));
+    if (!meta || this.eMetaTeto(meta)) return false;
+
+    meta.nome = dadosMeta.nome;
+    meta.tipo = this.META_TIPOS_PLANEJAMENTO[dadosMeta.tipo] ? dadosMeta.tipo : 'personalizada';
+    meta.prioridade = this.META_PRIORIDADES[dadosMeta.prioridade] ? dadosMeta.prioridade : 'media';
+    meta.valorObjetivo = this.arredondarMetaValor(dadosMeta.valorObjetivo);
+    meta.valorAlvo = meta.valorObjetivo;
+    meta.dataLimite = dadosMeta.dataLimite;
+    meta.criadoEm = meta.criadoEm || new Date().toISOString().split('T')[0];
+    meta.descricao = dadosMeta.descricao;
+    meta.valorAtual = this.calcularValorAtualMeta(meta.id);
+
+    return true;
+};
+
+app.ensureMetaUi = function() {
+    const successEl = document.getElementById('mensagemSucessoMeta');
+    if (successEl && !document.getElementById('mensagemErroMeta')) {
+        const errorEl = document.createElement('div');
+        errorEl.className = 'error-message';
+        errorEl.id = 'mensagemErroMeta';
+        successEl.insertAdjacentElement('afterend', errorEl);
+    }
+
+    const campos = document.getElementById('camposMetaPoupanca');
+    const valorMetaInput = document.getElementById('valorMeta');
+    const valorAtualInput = document.getElementById('valorAtualMeta');
+    const dataLimiteInput = document.getElementById('dataLimiteMeta');
+    const descricaoInput = document.getElementById('descricaoMeta');
+    const tituloForm = this.getMetaFormTitle ? this.getMetaFormTitle() : null;
+
+    if (tituloForm) tituloForm.textContent = 'Planejar Meta Financeira';
+
+    if (valorMetaInput) {
+        const group = valorMetaInput.closest('.form-group');
+        if (group) {
+            group.id = 'grupoValorObjetivoMeta';
+            const label = group.querySelector('label');
+            if (label) label.textContent = 'Valor Objetivo (R$)';
+        }
+    }
+
+    if (valorAtualInput) {
+        const group = valorAtualInput.closest('.form-group');
+        if (group) {
+            group.id = 'grupoValorAtualMeta';
+            const label = group.querySelector('label');
+            if (label) label.textContent = 'Aporte Inicial (R$)';
+        }
+    }
+
+    if (dataLimiteInput) {
+        dataLimiteInput.required = true;
+        const group = dataLimiteInput.closest('.form-group');
+        if (group) {
+            group.id = 'grupoDataLimiteMeta';
+            const label = group.querySelector('label');
+            if (label) label.textContent = 'Data Limite';
+        }
+    }
+
+    if (descricaoInput && !descricaoInput.dataset.defaultPlaceholder) {
+        descricaoInput.dataset.defaultPlaceholder = descricaoInput.placeholder || '';
+    }
+
+    if (campos && !document.getElementById('tipoPlanejamentoMeta')) {
+        const dataGroup = document.getElementById('grupoDataLimiteMeta');
+
+        const tipoGroup = document.createElement('div');
+        tipoGroup.className = 'form-group';
+        tipoGroup.id = 'grupoTipoPlanejamentoMeta';
+        tipoGroup.innerHTML = `
+            <label>Tipo da Meta</label>
+            <select id="tipoPlanejamentoMeta" required>
+                <option value="reserva_emergencia">🛟 Reserva de Emergência</option>
+                <option value="viagem">✈️ Viagem</option>
+                <option value="impostos">🧾 Impostos</option>
+                <option value="investimento">📈 Investimento</option>
+                <option value="personalizada">🎯 Personalizada</option>
+            </select>
+        `;
+
+        const prioridadeGroup = document.createElement('div');
+        prioridadeGroup.className = 'form-group';
+        prioridadeGroup.id = 'grupoPrioridadeMeta';
+        prioridadeGroup.innerHTML = `
+            <label>Prioridade</label>
+            <select id="prioridadeMeta" required>
+                <option value="alta">Alta</option>
+                <option value="media">Média</option>
+                <option value="baixa">Baixa</option>
+            </select>
+        `;
+
+        if (dataGroup) {
+            campos.insertBefore(prioridadeGroup, dataGroup);
+            campos.insertBefore(tipoGroup, prioridadeGroup);
+        } else {
+            campos.appendChild(tipoGroup);
+            campos.appendChild(prioridadeGroup);
+        }
+    }
+
+    const form = document.getElementById('formMeta');
+    if (form && !document.getElementById('metaFormHint')) {
+        const hint = document.createElement('div');
+        hint.id = 'metaFormHint';
+        hint.style.fontSize = '12px';
+        hint.style.color = 'var(--gray-500)';
+        hint.style.marginTop = '8px';
+        form.appendChild(hint);
+    }
+
+    this.atualizarModoFormularioMeta();
+};
+
+app.atualizarModoFormularioMeta = function() {
+    const editing = this.editingMetaId !== null;
+    const title = this.getMetaFormTitle ? this.getMetaFormTitle() : null;
+    const submitButton = this.getMetaSubmitButton ? this.getMetaSubmitButton() : null;
+    const valorAtualGroup = document.getElementById('grupoValorAtualMeta');
+    const valorAtualInput = document.getElementById('valorAtualMeta');
+    const hint = document.getElementById('metaFormHint');
+    const descricaoInput = document.getElementById('descricaoMeta');
+
+    if (title) title.textContent = editing ? 'Editar Meta Financeira' : 'Planejar Meta Financeira';
+    if (submitButton) submitButton.textContent = editing ? 'Salvar Meta' : 'Criar Meta';
+
+    if (valorAtualGroup) valorAtualGroup.style.display = editing ? 'none' : '';
+    if (valorAtualInput && editing) valorAtualInput.value = '';
+
+    if (descricaoInput) {
+        descricaoInput.disabled = false;
+        descricaoInput.placeholder = descricaoInput.dataset.defaultPlaceholder || 'Detalhes sobre a meta...';
+    }
+
+    if (hint) {
+        hint.textContent = editing
+            ? 'A edição altera apenas os dados da meta. Os aportes continuam preservados e separados.'
+            : 'Defina tipo, prioridade e prazo para receber a recomendação automática de aporte mensal.';
+    }
+};
+
+const carregarDadosMetaProfissionalBase = app.carregarDados.bind(app);
+app.carregarDados = function() {
+    carregarDadosMetaProfissionalBase();
+    const changed = this.normalizarMetasFinanceiras();
+    this.sincronizarValorAtualMetas();
+    if (changed) this.salvarDados();
+};
+
+const salvarDadosMetaProfissionalBase = app.salvarDados.bind(app);
+app.salvarDados = function() {
+    this.normalizarMetasFinanceiras();
+    this.sincronizarValorAtualMetas();
+    salvarDadosMetaProfissionalBase();
+};
+
+app.renderizarDependenciasMeta = function() {
+    this.atualizarDashboard();
+    this.listarMetas();
+    this.atualizarMetasResume();
+};
+
+app.resetarFormularioMeta = function() {
+    const form = document.getElementById('formMeta');
+    if (form) form.reset();
+
+    this.editingMetaId = null;
+    this.openAporteMetaId = null;
+
+    const tipoMeta = document.getElementById('tipoMeta');
+    if (tipoMeta) tipoMeta.value = 'poupanca';
+
+    const tipoPlanejamento = document.getElementById('tipoPlanejamentoMeta');
+    if (tipoPlanejamento) tipoPlanejamento.value = 'personalizada';
+
+    const prioridadeMeta = document.getElementById('prioridadeMeta');
+    if (prioridadeMeta) prioridadeMeta.value = 'media';
+
+    this.setarDataAtual();
+
+    const errorEl = document.getElementById('mensagemErroMeta');
+    if (errorEl) errorEl.classList.remove('show');
+
+    this.atualizarModoFormularioMeta();
+};
+
+const adicionarMetaProfissionalBase = app.adicionarMeta.bind(app);
+app.adicionarMeta = function(e) {
+    e.preventDefault();
+
+    const seletorTipo = document.getElementById('tipoMeta');
+    if (seletorTipo && seletorTipo.value !== 'poupanca') {
+        adicionarMetaProfissionalBase(e);
+        return;
+    }
+
+    const nome = document.getElementById('nomeMeta').value.trim();
+    const valorObjetivo = this.arredondarMetaValor(document.getElementById('valorMeta').value);
+    const aporteInicial = this.arredondarMetaValor(document.getElementById('valorAtualMeta').value);
+    const dataLimite = document.getElementById('dataLimiteMeta').value;
+    const descricao = document.getElementById('descricaoMeta').value;
+    const tipo = document.getElementById('tipoPlanejamentoMeta')?.value || 'personalizada';
+    const prioridade = document.getElementById('prioridadeMeta')?.value || 'media';
+
+    if (!nome) {
+        this.mostrarErro('mensagemErroMeta', 'Informe o nome da meta.');
+        return;
+    }
+
+    if (valorObjetivo <= 0) {
+        this.mostrarErro('mensagemErroMeta', 'Informe um valor objetivo maior que zero.');
+        return;
+    }
+
+    if (!dataLimite) {
+        this.mostrarErro('mensagemErroMeta', 'Informe a data limite da meta.');
+        return;
+    }
+
+    if (this.editingMetaId !== null) {
+        const atualizou = this.atualizarMeta(this.editingMetaId, {
+            nome,
+            tipo,
+            prioridade,
+            valorObjetivo,
+            dataLimite,
+            descricao
+        });
+
+        if (!atualizou) {
+            this.resetarFormularioMeta();
+            this.mostrarErro('mensagemErroMeta', 'Meta não encontrada para edição.');
+            return;
+        }
+
+        this.salvarDados();
+        this.resetarFormularioMeta();
+        this.mostrarMensagem('mensagemSucessoMeta', 'Meta atualizada com sucesso!');
+    } else {
+        const meta = {
+            id: Date.now(),
+            nome,
+            tipo,
+            prioridade,
+            valorObjetivo,
+            valorAlvo: valorObjetivo,
+            valorAtual: 0,
+            dataLimite,
+            criadoEm: new Date().toISOString().split('T')[0],
+            descricao
+        };
+
+        this.dados.metas.push(meta);
+        if (aporteInicial > 0) {
+            this.criarAporteMeta(meta.id, aporteInicial, new Date().toISOString().split('T')[0], 'Aporte inicial');
+        }
+
+        this.salvarDados();
+        this.resetarFormularioMeta();
+        this.mostrarMensagem('mensagemSucessoMeta', 'Meta criada com sucesso!');
+    }
+
+    this.renderizarDependenciasMeta();
+    this.abrirTelaMetasPoupanca();
+};
+
+app.editarMeta = function(id) {
+    const meta = this.dados.metas.find(item => String(item.id) === String(id));
+    if (!meta || this.eMetaTeto(meta)) return;
+
+    this.normalizarMetaFinanceira(meta);
+    this.editingMetaId = id;
+
+    document.getElementById('nomeMeta').value = meta.nome || '';
+    document.getElementById('tipoMeta').value = 'poupanca';
+    document.getElementById('valorMeta').value = meta.valorObjetivo || meta.valorAlvo || 0;
+    document.getElementById('valorAtualMeta').value = '';
+    document.getElementById('dataLimiteMeta').value = meta.dataLimite || '';
+    document.getElementById('descricaoMeta').value = meta.descricao || '';
+
+    const tipoPlanejamento = document.getElementById('tipoPlanejamentoMeta');
+    if (tipoPlanejamento) tipoPlanejamento.value = meta.tipo || 'personalizada';
+
+    const prioridadeMeta = document.getElementById('prioridadeMeta');
+    if (prioridadeMeta) prioridadeMeta.value = meta.prioridade || 'media';
+
+    this.atualizarModoFormularioMeta();
+    this.abrirTelaMetasPoupanca();
+};
+
+app.deletarMeta = function(id) {
+    if (!confirm('Deseja deletar esta meta?')) return;
+
+    this.dados.metas = this.dados.metas.filter(meta => String(meta.id) !== String(id));
+    this.dados.aportesMeta = (this.dados.aportesMeta || []).filter(aporte => String(aporte.metaId) !== String(id));
+
+    if (String(this.editingMetaId) === String(id)) this.resetarFormularioMeta();
+    if (String(this.openAporteMetaId) === String(id)) this.openAporteMetaId = null;
+
+    this.salvarDados();
+    this.renderizarDependenciasMeta();
+};
+
+app.listarMetas = function() {
+    const container = document.getElementById('listaMetas');
+    if (!container) return;
+
+    if (!Array.isArray(this.dados.aportesMeta)) this.dados.aportesMeta = [];
+    this.sincronizarValorAtualMetas();
+
+    if (this.dados.metas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma meta registrada</div>';
+        return;
+    }
+
+    const agora = new Date();
+    const mesAtual = agora.getMonth();
+    const anoAtual = agora.getFullYear();
+
+    container.innerHTML = this.dados.metas.map(meta => {
+        if (this.eMetaTeto(meta)) {
+            const gasto = this.calcularGastoCategoriaNoMes(meta.categoria, mesAtual, anoAtual);
+            const percentual = meta.teto > 0 ? Math.min((gasto / meta.teto) * 100, 100) : 0;
+            const over = gasto > meta.teto;
+            let badgeCls = 'teto-ok';
+            let badgeLabel = 'OK';
+            if (gasto > meta.teto) {
+                badgeCls = 'teto-estourado';
+                badgeLabel = 'Estourado';
+            } else if (gasto >= meta.teto * 0.8) {
+                badgeCls = 'teto-alerta';
+                badgeLabel = 'Alerta';
+            }
+
+            return `
+                <div class="goal-item">
+                    <div class="goal-header">
+                        <div class="goal-title">${app._resolveEmoji(meta.categoria)} ${meta.nome} <span class="teto-badge ${badgeCls}">${badgeLabel}</span></div>
+                        <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill ${over ? 'over' : ''}" style="width:${percentual}%"></div>
+                    </div>
+                    <div class="goal-meta">
+                        Gasto: R$ ${this.formatarMoeda(gasto)} / Teto: R$ ${this.formatarMoeda(meta.teto)}
+                        • Categoria: ${meta.categoria} (inclui cartão)
+                    </div>
+                    <div style="margin-top:8px;display:flex;gap:5px;">
+                        <button class="btn-danger btn-small" onclick="app.deletarMeta(${meta.id})">Deletar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        this.normalizarMetaFinanceira(meta);
+
+        const tipoInfo = this.getMetaPlanejamentoInfo(meta.tipo);
+        const prioridadeInfo = this.getMetaPrioridadeInfo(meta.prioridade);
+        const calculo = this.calcularAporteSugerido(meta);
+        const valorAtual = calculo.valorAtual;
+        const valorObjetivo = calculo.valorObjetivo;
+        const percentual = valorObjetivo > 0 ? Math.min((valorAtual / valorObjetivo) * 100, 100) : 0;
+        const aportes = this.getAportesMeta(meta.id);
+        const aporteAberto = String(this.openAporteMetaId) === String(meta.id);
+        const dataPadrao = new Date().toISOString().split('T')[0];
+        const mensagemColor = calculo.status === 'atrasada'
+            ? '#9b2c2c'
+            : calculo.status === 'concluida'
+                ? '#22543d'
+                : '#2d3748';
+        const mensagemBg = calculo.status === 'atrasada'
+            ? '#fff5f5'
+            : calculo.status === 'concluida'
+                ? '#f0fff4'
+                : '#f7fafc';
+        const historico = aportes.slice(0, 3).map(aporte => `
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-top:1px solid rgba(0,0,0,0.06);font-size:12px;">
+                <span>${this.formatarData(aporte.data)}${aporte.observacao ? ' • ' + aporte.observacao : ''}</span>
+                <strong style="color:var(--success);white-space:nowrap;">+ R$ ${this.formatarMoeda(aporte.valor)}</strong>
+            </div>
+        `).join('');
+
+        return `
+            <div class="goal-item" style="border-left:4px solid ${calculo.status === 'atrasada' ? '#e53e3e' : calculo.status === 'concluida' ? '#38a169' : '#667eea'};">
+                <div class="goal-header" style="align-items:flex-start;">
+                    <div>
+                        <div class="goal-title">${tipoInfo.icon} ${meta.nome}</div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;">
+                            <span style="font-size:11px;padding:3px 8px;border-radius:999px;background:#edf2f7;color:#2d3748;">${tipoInfo.label}</span>
+                            <span style="font-size:11px;padding:3px 8px;border-radius:999px;background:${prioridadeInfo.bg};color:${prioridadeInfo.color};">Prioridade ${prioridadeInfo.label}</span>
+                            ${calculo.status === 'concluida' ? '<span style="font-size:11px;padding:3px 8px;border-radius:999px;background:#c6f6d5;color:#22543d;">Concluída</span>' : ''}
+                            ${calculo.status === 'atrasada' ? '<span style="font-size:11px;padding:3px 8px;border-radius:999px;background:#fed7d7;color:#9b2c2c;">Prazo vencido</span>' : ''}
+                        </div>
+                    </div>
+                    <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${percentual}%"></div>
+                </div>
+                <div class="goal-meta">
+                    R$ ${this.formatarMoeda(valorAtual)} / R$ ${this.formatarMoeda(valorObjetivo)}
+                    • Restante: R$ ${this.formatarMoeda(Math.max(calculo.valorRestante, 0))}
+                    ${meta.dataLimite ? ' • Prazo: ' + this.formatarData(meta.dataLimite) : ''}
+                </div>
+                <div class="goal-meta" style="margin-top:6px;">
+                    Criada em ${this.formatarData(meta.criadoEm)} • ${aportes.length} aporte(s)
+                    ${calculo.aporteSugeridoMensal ? ' • Sugestão mensal: R$ ' + this.formatarMoeda(calculo.aporteSugeridoMensal) : ''}
+                </div>
+                <div style="margin-top:10px;padding:10px;border-radius:10px;background:${mensagemBg};color:${mensagemColor};font-size:12px;line-height:1.5;border:1px solid rgba(0,0,0,0.05);">
+                    ${calculo.mensagem}
+                </div>
+                <div style="margin-top:8px;display:flex;gap:5px;flex-wrap:wrap;">
+                    <button class="btn-success btn-small" onclick="app.toggleAporteMeta(${meta.id})">${aporteAberto ? 'Fechar aporte' : '➕ Adicionar aporte'}</button>
+                    <button class="btn-warning btn-small" onclick="app.editarMeta(${meta.id})">✏️ Editar meta</button>
+                    <button class="btn-danger btn-small" onclick="app.deletarMeta(${meta.id})">Deletar</button>
+                </div>
+                <div style="margin-top:10px;padding:10px;border-radius:10px;background:rgba(102,126,234,0.06);">
+                    <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:6px;">Histórico recente de aportes</div>
+                    ${historico || '<div style="font-size:12px;color:var(--gray-500);">Nenhum aporte registrado ainda.</div>'}
+                </div>
+                ${aporteAberto ? `
+                    <div style="margin-top:10px;padding:12px;border:1px dashed var(--primary);border-radius:10px;background:#fff;">
+                        <div style="font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:8px;">Adicionar aporte à meta</div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Valor do aporte (R$)</label>
+                            <input type="number" id="aporteValorMeta-${meta.id}" step="0.01" min="0" placeholder="0,00">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Data do aporte</label>
+                            <input type="date" id="aporteDataMeta-${meta.id}" value="${dataPadrao}">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label>Observação</label>
+                            <input type="text" id="aporteObsMeta-${meta.id}" placeholder="Opcional">
+                        </div>
+                        <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                            <button class="btn-success btn-small" onclick="app.adicionarAporteMeta(${meta.id})">Salvar aporte</button>
+                            <button class="btn-warning btn-small" onclick="app.cancelarAporteMeta(${meta.id})">Cancelar</button>
+                        </div>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    }).join('');
+};
+
+app.atualizarMetasResume = function() {
+    const container = document.getElementById('metasResume');
+    if (!container) return;
+
+    this.sincronizarValorAtualMetas();
+
+    if (this.dados.metas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma meta registrada</div>';
+        return;
+    }
+
+    const agora = new Date();
+    const mes = agora.getMonth();
+    const ano = agora.getFullYear();
+
+    container.innerHTML = this.dados.metas.slice(0, 3).map(meta => {
+        if (this.eMetaTeto(meta)) {
+            const gasto = this.calcularGastoCategoriaNoMes(meta.categoria, mes, ano);
+            const percentual = meta.teto > 0 ? Math.min((gasto / meta.teto) * 100, 100) : 0;
+            return `
+                <div style="background:none;border-left:4px solid #667eea;padding:8px;margin-bottom:10px;">
+                    <div class="goal-header">
+                        <div class="goal-title" style="font-size:13px;">${meta.nome} (teto)</div>
+                        <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width:${percentual}%"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        this.normalizarMetaFinanceira(meta);
+        const tipoInfo = this.getMetaPlanejamentoInfo(meta.tipo);
+        const calculo = this.calcularAporteSugerido(meta);
+        const percentual = calculo.valorObjetivo > 0 ? Math.min((calculo.valorAtual / calculo.valorObjetivo) * 100, 100) : 0;
+
+        return `
+            <div style="background:none;border-left:4px solid ${calculo.status === 'atrasada' ? '#e53e3e' : '#667eea'};padding:8px;margin-bottom:10px;">
+                <div class="goal-header">
+                    <div class="goal-title" style="font-size:13px;">${tipoInfo.icon} ${meta.nome}</div>
+                    <div class="goal-percentage">${percentual.toFixed(0)}%</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${percentual}%"></div>
+                </div>
+                <div style="font-size:11px;color:var(--gray-500);margin-top:6px;">${calculo.mensagem}</div>
+            </div>
+        `;
+    }).join('');
+};
+</script>
 </body>
 </html>
