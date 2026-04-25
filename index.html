@@ -578,14 +578,522 @@
         .media-badge.below { background: #fee2e2; color: #7f1d1d; }
         .media-badge.equal { background: var(--gray-100); color: var(--gray-500); }
     </style>
+    <style>
+        :root {
+            --primary: #bfc3c9;
+            --primary-dark: #a7adb5;
+            --primary-light: rgba(191, 195, 201, 0.16);
+            --secondary: #8f97a3;
+            --success: #2f855a;
+            --success-light: rgba(47, 133, 90, 0.08);
+            --danger: #c0565a;
+            --danger-light: rgba(192, 86, 90, 0.08);
+            --warning: #b7791f;
+            --warning-light: rgba(183, 121, 31, 0.08);
+            --gray-50: #f4f5f7;
+            --gray-100: #ffffff;
+            --gray-200: #e0e3e8;
+            --gray-300: #d1d6dd;
+            --gray-400: #9aa3af;
+            --gray-500: #6b7280;
+            --gray-700: #374151;
+            --gray-900: #1a1d23;
+            --shadow-sm: 0 8px 20px rgba(26, 29, 35, 0.05);
+            --shadow: 0 14px 34px rgba(26, 29, 35, 0.08);
+            --shadow-lg: 0 22px 44px rgba(26, 29, 35, 0.12);
+        }
+
+        body {
+            background: #f4f5f7 !important;
+            color: var(--gray-700) !important;
+        }
+
+        .container {
+            max-width: 1320px;
+        }
+
+        header,
+        .card,
+        .modal-content,
+        .teto-card,
+        .comp-cat-card,
+        .media-card,
+        .goal-item,
+        .invoice-stat,
+        .list-item-cc,
+        .cat-row,
+        .sub-nav-btn,
+        .filter-btn,
+        .parcel-list {
+            background: #ffffff !important;
+            border-color: #e0e3e8 !important;
+            box-shadow: var(--shadow-sm) !important;
+            color: var(--gray-700) !important;
+        }
+
+        header {
+            padding: 18px 22px !important;
+            background: rgba(255, 255, 255, 0.94) !important;
+            backdrop-filter: blur(14px);
+        }
+
+        .app-brand {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            min-width: 240px;
+        }
+
+        .brand-mark {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.98), rgba(191,195,201,0.45));
+            border: 1px solid rgba(191,195,201,0.72);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 8px 18px rgba(26,29,35,0.08);
+            overflow: hidden;
+        }
+
+        .brand-mark img {
+            width: 88%;
+            height: 88%;
+            object-fit: contain;
+            filter: drop-shadow(0 6px 12px rgba(26,29,35,0.12));
+        }
+
+        .brand-copy {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .brand-name {
+            color: var(--gray-900);
+            font-size: 24px;
+            font-weight: 800;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .brand-subtitle {
+            color: var(--gray-500);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+        }
+
+        h1,
+        .card h2,
+        .goal-title,
+        .list-item-title,
+        .media-cat,
+        .comp-cat-name,
+        .destaque-title,
+        .invoice-stat-value,
+        .teto-card-title,
+        .cat-name {
+            color: var(--gray-900) !important;
+        }
+
+        .card h2 {
+            border-bottom-color: rgba(192, 192, 192, 0.08) !important;
+            margin-bottom: 18px;
+            padding-bottom: 12px;
+            font-size: 15px;
+        }
+
+        .card h3,
+        label,
+        .list-item-meta,
+        .goal-meta,
+        .chart-label,
+        .chart-value,
+        .media-val-label,
+        .media-insight,
+        .destaque-label,
+        .destaque-desc,
+        .invoice-stat-label,
+        .cat-id,
+        .cat-usage,
+        .empty-state,
+        .limit-text,
+        .parcel-item {
+            color: var(--gray-500) !important;
+        }
+
+        .nav-buttons {
+            gap: 8px;
+        }
+
+        .nav-btn,
+        .sub-nav-btn,
+        .filter-btn,
+        .dashboard-shortcut,
+        .btn-secondary {
+            background: #f7f8fa !important;
+            color: var(--gray-700) !important;
+            border: 1px solid #e0e3e8 !important;
+            box-shadow: none !important;
+        }
+
+        .nav-btn.active,
+        .sub-nav-btn.active,
+        .filter-btn.active {
+            background: #ffffff !important;
+            color: var(--gray-900) !important;
+            border-color: rgba(191,195,201,0.95) !important;
+        }
+
+        .nav-btn:hover,
+        .sub-nav-btn:hover,
+        .filter-btn:hover,
+        .dashboard-shortcut:hover,
+        .btn-secondary:hover {
+            border-color: rgba(191,195,201,0.95) !important;
+            color: var(--gray-900) !important;
+            transform: none !important;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        input[type="month"],
+        input[type="password"],
+        select,
+        textarea {
+            background: #ffffff !important;
+            color: var(--gray-900) !important;
+            border-color: #e0e3e8 !important;
+            box-shadow: none !important;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: rgba(191,195,201,0.9) !important;
+            box-shadow: 0 0 0 3px rgba(191,195,201,0.18) !important;
+        }
+
+        .btn-primary,
+        .btn-success,
+        .btn-warning,
+        .btn-danger {
+            box-shadow: none !important;
+            transform: none !important;
+        }
+
+        .btn-primary {
+            background: #bfc3c9 !important;
+            color: #1a1d23 !important;
+        }
+
+        .btn-success {
+            background: rgba(47,133,90,0.08) !important;
+            color: var(--success) !important;
+            border: 1px solid rgba(47,133,90,0.18) !important;
+        }
+
+        .btn-warning {
+            background: rgba(183,121,31,0.08) !important;
+            color: var(--warning) !important;
+            border: 1px solid rgba(183,121,31,0.18) !important;
+        }
+
+        .btn-danger {
+            background: rgba(192,86,90,0.08) !important;
+            color: var(--danger) !important;
+            border: 1px solid rgba(192,86,90,0.18) !important;
+        }
+
+        .summary-card {
+            background: #ffffff !important;
+            border: 1px solid #e0e3e8 !important;
+            color: var(--gray-700) !important;
+            text-align: left !important;
+            padding: 18px !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        .summary-card h3 {
+            color: var(--gray-500) !important;
+            font-size: 11px !important;
+            letter-spacing: 0.08em !important;
+            margin-bottom: 10px !important;
+        }
+
+        .summary-card .value {
+            color: var(--gray-900) !important;
+            font-size: 28px !important;
+            font-weight: 800 !important;
+            letter-spacing: -0.03em !important;
+        }
+
+        .summary-card.income,
+        .summary-card.expense,
+        .summary-card.balance,
+        .summary-card.warning,
+        .summary-card.success {
+            background: #ffffff !important;
+        }
+
+        .summary-card.income { border-color: rgba(47,133,90,0.16) !important; }
+        .summary-card.expense { border-color: rgba(192,86,90,0.16) !important; }
+        .summary-card.balance { border-color: rgba(191,195,201,0.9) !important; }
+        .summary-card.income .value { color: var(--success) !important; }
+        .summary-card.expense .value { color: var(--danger) !important; }
+        .summary-card.balance .value { color: var(--gray-900) !important; }
+
+        .list-item,
+        .alerta-toast,
+        .alerta-inline,
+        .invoice-header,
+        .comp-table th,
+        .comp-table td,
+        .destaque-card,
+        .info-box,
+        .success-message,
+        .error-message,
+        .list-cc-container {
+            border-color: #e0e3e8 !important;
+        }
+
+        .list-item,
+        .list-item-cc,
+        .cat-row {
+            background: #ffffff !important;
+        }
+
+        .list-item:hover,
+        .list-item-cc:hover,
+        .cat-row:hover,
+        .goal-item:hover,
+        .comp-cat-card:hover,
+        .media-card:hover,
+        .teto-card:hover {
+            background: #fbfbfc !important;
+            box-shadow: var(--shadow-sm) !important;
+        }
+
+        .empty-state {
+            border: 1px dashed #d6dae0;
+            border-radius: 12px;
+            background: rgba(255,255,255,0.68);
+        }
+
+        .progress-bar,
+        .comp-cat-bar,
+        .chart-bar-bg,
+        .limit-bar {
+            background: #edf0f4 !important;
+        }
+
+        .progress-fill,
+        .chart-bar-fill,
+        .limit-fill,
+        .comp-cat-bar-fill {
+            background: linear-gradient(90deg, #9ca3af, #c8ccd1) !important;
+        }
+
+        .progress-fill.over {
+            background: linear-gradient(90deg, #ef4444, #f87171) !important;
+        }
+
+        .badge,
+        .teto-badge,
+        .media-badge {
+            border: 1px solid #e0e3e8;
+        }
+
+        .invoice-stat,
+        .parcel-list,
+        .comp-table th,
+        .comp-table tr:hover td,
+        .teto-val-item,
+        .hist-bar-wrap,
+        .info-box {
+            background: #f8f9fb !important;
+        }
+
+        .destaque-card.d-principal,
+        .destaque-card.d-crescimento,
+        .destaque-card.d-queda,
+        .destaque-card.d-estavel {
+            background: #ffffff !important;
+        }
+
+        .destaque-card.d-principal { border-left-color: #c0c0c0 !important; }
+        .destaque-card.d-crescimento { border-left-color: var(--success) !important; }
+        .destaque-card.d-queda { border-left-color: var(--danger) !important; }
+        .destaque-card.d-estavel { border-left-color: #7f8794 !important; }
+
+        .dashboard-shell {
+            display: block;
+        }
+
+        .dashboard-primary {
+            max-width: 1040px;
+            margin: 0 auto;
+        }
+
+        .dashboard-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: flex-start;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .dashboard-eyebrow {
+            font-size: 11px;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: #8f97a3;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-heading h2 {
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            font-size: 26px;
+            letter-spacing: -0.04em;
+        }
+
+        .dashboard-support {
+            color: var(--gray-500);
+            font-size: 13px;
+            max-width: 320px;
+            line-height: 1.5;
+            text-align: right;
+        }
+
+        .dashboard-period-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            border: 1px solid #e0e3e8;
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .dashboard-period-label {
+            color: var(--gray-900);
+            font-size: 18px;
+            font-weight: 700;
+            letter-spacing: -0.03em;
+        }
+
+        .dashboard-kpis {
+            margin-bottom: 14px;
+        }
+
+        .dashboard-comparison-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .dashboard-comparison-grid > div {
+            padding: 14px 16px;
+            border: 1px solid #e0e3e8;
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: var(--shadow-sm);
+        }
+
+        #dashboard .dashboard-comparison-grid > div:nth-child(2) {
+            display: none !important;
+        }
+
+        .dashboard-compare-title {
+            color: var(--gray-500);
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+        }
+
+        .dashboard-compare-body,
+        #dashboardComparativos strong,
+        #dashboardComparativos div {
+            color: var(--gray-700);
+        }
+
+        .dashboard-shortcuts {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .dashboard-shortcut {
+            padding: 12px 14px;
+            border-radius: 12px;
+            font-size: 13px;
+            font-weight: 700;
+            text-align: left;
+        }
+
+        .dashboard-compat {
+            display: none !important;
+        }
+
+        .main-content,
+        .two-column {
+            gap: 18px;
+        }
+
+        @media (max-width: 768px) {
+            .app-brand {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .brand-copy {
+                align-items: center;
+                text-align: center;
+            }
+
+            .dashboard-support {
+                text-align: left;
+                max-width: none;
+            }
+
+            .dashboard-period-nav,
+            .dashboard-shortcuts {
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-shortcuts {
+                display: grid;
+            }
+        }
+    </style>
 </head>
 <body>
 <div id="alertasContainer"></div>
 <div class="container">
     <header>
-        <h1>💰 Controle Financeiro</h1>
+        <div class="app-brand">
+            <div class="brand-mark">
+                <img src="file:///C:/Users/Stella/Downloads/Gemini_Generated_Image_56z9m156z9m156z9-removebg-preview.png" alt="OPS">
+            </div>
+            <div class="brand-copy">
+                <div class="brand-name">OPS</div>
+                <div class="brand-subtitle">Patrimônio sob domínio</div>
+            </div>
+        </div>
         <div class="nav-buttons">
             <button class="nav-btn active" data-section="dashboard">📊 Dashboard</button>
+            <button class="nav-btn" data-section="visao-anual">🗓️ Visão Anual</button>
             <button class="nav-btn" data-section="receitas">💵 Receitas</button>
             <button class="nav-btn" data-section="despesas">📤 Despesas</button>
             <button class="nav-btn" data-section="cartoes">💳 Cartões</button>
@@ -599,54 +1107,86 @@
 
     <!-- DASHBOARD -->
     <section id="dashboard" class="section active">
-        <div class="main-content">
-            <div class="card">
-                <h2>📊 Resumo Financeiro</h2>
-                <div class="summary" style="grid-template-columns: repeat(3,1fr);">
+        <div class="dashboard-shell">
+            <div class="card dashboard-primary">
+                <div class="dashboard-heading">
+                    <div>
+                        <div class="dashboard-eyebrow">OPS</div>
+                        <h2>Painel do mês</h2>
+                    </div>
+                    <div id="dashboardPeriodoResumo" class="dashboard-support">Exibindo somente o período selecionado.</div>
+                </div>
+
+                <div class="dashboard-period-nav">
+                    <button class="btn-secondary btn-small" type="button" onclick="app.navegarDashboardMes(-1)">&lt; Mês anterior</button>
+                    <div id="dashboardPeriodoLabel" class="dashboard-period-label">Mês atual</div>
+                    <button class="btn-secondary btn-small" type="button" onclick="app.navegarDashboardMes(1)">Próximo mês &gt;</button>
+                </div>
+
+                <div class="summary dashboard-kpis" style="grid-template-columns: repeat(3,1fr);">
                     <div class="summary-card income">
-                        <h3>Receitas</h3>
+                        <h3>Receita do mês</h3>
                         <div class="value" id="totalReceitas">R$ 0,00</div>
                     </div>
                     <div class="summary-card expense">
-                        <h3>Despesas</h3>
+                        <h3>Despesa do mês</h3>
                         <div class="value" id="totalDespesas">R$ 0,00</div>
                     </div>
                     <div class="summary-card balance">
-                        <h3>Saldo</h3>
+                        <h3>Saldo do mês</h3>
                         <div class="value" id="saldo">R$ 0,00</div>
                     </div>
                 </div>
 
+                <div id="dashboardComparativos" class="dashboard-comparison-grid">
+                    <div>
+                        <div class="dashboard-compare-title">Comparação com o mês anterior</div>
+                        <div class="dashboard-compare-body">Aguardando dados do período.</div>
+                    </div>
+                    <div>
+                        <div class="dashboard-compare-title">Média do ano</div>
+                        <div class="dashboard-compare-body">Aguardando histórico anual.</div>
+                    </div>
+                </div>
+
+                <div class="dashboard-shortcuts">
+                    <button class="dashboard-shortcut" data-section="receitas" type="button">Ver receitas</button>
+                    <button class="dashboard-shortcut" data-section="despesas" type="button">Ver despesas</button>
+                    <button class="dashboard-shortcut" data-section="visao-anual" type="button">Ver visão anual</button>
+                </div>
+            </div>
+
+            <div class="dashboard-compat" aria-hidden="true">
                 <div class="summary" style="grid-template-columns: repeat(2,1fr); margin-bottom: 0;">
-                    <div class="summary-card" style="background:linear-gradient(135deg,#764ba2 0%,#667eea 100%)">
-                        <h3>Fatura do Mês</h3>
+                    <div class="summary-card">
+                        <h3>Fatura do mês</h3>
                         <div class="value" id="totalFaturaAtual">R$ 0,00</div>
                     </div>
                     <div class="summary-card balance">
-                        <h3>Limite Disponível</h3>
+                        <h3>Limite disponível</h3>
                         <div class="value" id="limiteDisponivel">R$ 0,00</div>
                     </div>
                 </div>
 
                 <div class="summary" style="grid-template-columns: 1fr; margin-top: 18px;">
-                    <div class="summary-card" id="cardProjecaoMensal" style="background:linear-gradient(135deg,#0f766e 0%,#0ea5a3 100%); text-align:left;">
+                    <div class="summary-card" id="cardProjecaoMensal" style="text-align:left;">
                         <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
                             <div>
-                                <h3 style="margin-bottom:6px;">💸 Projeção do Mês</h3>
-                                <div id="projecaoResumo" style="font-size:12px;opacity:0.95;line-height:1.5;">💸 A projeção será exibida após alguns dias de movimentação</div>
+                                <h3 style="margin-bottom:6px;">Projeção do mês</h3>
+                                <div id="projecaoResumo" style="font-size:12px;opacity:0.95;line-height:1.5;">A projeção será exibida após alguns dias de movimentação</div>
                             </div>
-                            <div id="projecaoConfianca" style="font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.18);color:#fff;white-space:nowrap;">Sem dados</div>
+                            <div id="projecaoConfianca" style="font-size:11px;padding:4px 10px;border-radius:999px;">Sem dados</div>
                         </div>
                         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;">
-                            <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;">
+                            <div>
                                 <div style="font-size:11px;opacity:0.9;">Receita projetada</div>
                                 <div id="receitaProjetada" style="font-size:18px;font-weight:700;margin-top:4px;">R$ 0,00</div>
                             </div>
-                            <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;">
+                            <div>
                                 <div style="font-size:11px;opacity:0.9;">Despesa projetada</div>
                                 <div id="despesaProjetada" style="font-size:18px;font-weight:700;margin-top:4px;">R$ 0,00</div>
                             </div>
-                            <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;">
+                            <div>
                                 <div style="font-size:11px;opacity:0.9;">Saldo estimado</div>
                                 <div id="saldoProjetado" style="font-size:18px;font-weight:700;margin-top:4px;">R$ 0,00</div>
                             </div>
@@ -655,22 +1195,78 @@
                     </div>
                 </div>
 
-                <h2 style="margin-top:22px;">📈 Últimas Transações</h2>
                 <div class="list-container" id="ultimasTransacoes">
                     <div class="empty-state">Nenhuma transação registrada</div>
                 </div>
-            </div>
-
-            <div class="card">
-                <h2>📊 Despesas por Categoria</h2>
                 <div id="chartCategorias">
                     <div class="empty-state">Sem dados para exibir</div>
                 </div>
-
-                <h2 style="margin-top:22px;">🎯 Metas em Progresso</h2>
                 <div id="metasResume" class="goal-progress">
                     <div class="empty-state">Nenhuma meta registrada</div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- VISAO ANUAL -->
+    <section id="visao-anual" class="section">
+        <div class="card" style="margin-bottom:18px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;">
+                <div>
+                    <h2 style="margin-bottom:6px;">Visão Anual</h2>
+                    <div id="visaoAnualResumo" style="font-size:12px;color:var(--gray-500);">Leitura consolidada do ano selecionado.</div>
+                </div>
+                <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <button class="btn-secondary btn-small" type="button" onclick="app.navegarVisaoAnual(-1)">&lt; Ano anterior</button>
+                    <div id="visaoAnualAnoLabel" style="font-weight:700;color:var(--gray-700);min-width:84px;text-align:center;">0000</div>
+                    <button class="btn-secondary btn-small" type="button" onclick="app.navegarVisaoAnual(1)">Próximo ano &gt;</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="summary" style="grid-template-columns:repeat(3,1fr);margin-bottom:18px;">
+            <div class="summary-card income">
+                <h3>Total de receitas</h3>
+                <div class="value" id="visaoAnualTotalReceitas">R$ 0,00</div>
+            </div>
+            <div class="summary-card expense">
+                <h3>Total de despesas</h3>
+                <div class="value" id="visaoAnualTotalDespesas">R$ 0,00</div>
+            </div>
+            <div class="summary-card balance">
+                <h3>Saldo anual</h3>
+                <div class="value" id="visaoAnualSaldo">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="summary" style="grid-template-columns:repeat(2,1fr);margin-bottom:18px;">
+            <div class="summary-card" style="background:linear-gradient(135deg,#0f766e 0%,#0ea5a3 100%);">
+                <h3>Média mensal de receitas</h3>
+                <div class="value" id="visaoAnualMediaReceitas">R$ 0,00</div>
+            </div>
+            <div class="summary-card" style="background:linear-gradient(135deg,#c05621 0%,#dd6b20 100%);">
+                <h3>Média mensal de despesas</h3>
+                <div class="value" id="visaoAnualMediaDespesas">R$ 0,00</div>
+            </div>
+        </div>
+
+        <div class="summary" style="grid-template-columns:repeat(2,1fr);margin-bottom:18px;">
+            <div class="summary-card" style="background:linear-gradient(135deg,#4c51bf 0%,#667eea 100%);text-align:left;">
+                <h3>Melhor mês de receita</h3>
+                <div class="value" id="visaoAnualMelhorReceita">--</div>
+                <div id="visaoAnualMelhorReceitaMeta" style="font-size:12px;opacity:0.92;margin-top:8px;">Sem dados</div>
+            </div>
+            <div class="summary-card" style="background:linear-gradient(135deg,#9b2c2c 0%,#e53e3e 100%);text-align:left;">
+                <h3>Mês com maior gasto</h3>
+                <div class="value" id="visaoAnualMaiorGasto">--</div>
+                <div id="visaoAnualMaiorGastoMeta" style="font-size:12px;opacity:0.92;margin-top:8px;">Sem dados</div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 style="margin-bottom:14px;">Evolução mês a mês</h2>
+            <div id="visaoAnualEvolucao">
+                <div class="empty-state">Sem dados para exibir</div>
             </div>
         </div>
     </section>
@@ -800,18 +1396,18 @@
                         <h2>➕ Cadastrar Cartão</h2>
                         <div class="success-message" id="msgSuccessCard"></div>
                         <div class="error-message" id="msgErrorCard"></div>
-                        <form id="formCartao">
+                        <form id="formCartão">
                             <div class="form-group">
                                 <label>Nome do Cartão</label>
-                                <input type="text" id="nomeCartao" placeholder="Ex: Nubank Mastercard" required>
+                                <input type="text" id="nomeCartão" placeholder="Ex: Nubank Mastercard" required>
                             </div>
                             <div class="form-group">
                                 <label>Banco</label>
-                                <input type="text" id="bancoCartao" placeholder="Ex: Nubank" required>
+                                <input type="text" id="bancoCartão" placeholder="Ex: Nubank" required>
                             </div>
                             <div class="form-group">
                                 <label>Limite Total (R$)</label>
-                                <input type="number" id="limiteCartao" step="0.01" min="0" placeholder="0,00" required>
+                                <input type="number" id="limiteCartão" step="0.01" min="0" placeholder="0,00" required>
                             </div>
                             <div class="two-column" style="gap:12px;">
                                 <div class="form-group">
@@ -828,7 +1424,7 @@
                     </div>
                     <div>
                         <h2>💳 Meus Cartões</h2>
-                        <div id="listaCartoes">
+                        <div id="listaCartões">
                             <div class="empty-state">Nenhum cartão cadastrado</div>
                         </div>
                     </div>
@@ -908,7 +1504,7 @@
                 <div class="two-column">
                     <div>
                         <h2>📈 Resumo de Cartões</h2>
-                        <div id="resumoCartoes">
+                        <div id="resumoCartões">
                             <div class="empty-state">Nenhum cartão cadastrado</div>
                         </div>
                     </div>
@@ -922,18 +1518,18 @@
                 <div class="two-column" style="margin-top:18px;">
                     <div>
                         <h2>💳 Projeção da Fatura</h2>
-                        <div id="projecaoFaturaCartao">
+                        <div id="projecaoFaturaCartão">
                             <div class="empty-state">Nenhum cartão cadastrado</div>
                         </div>
 
                         <h2 style="margin-top:22px;">🔔 Alertas Inteligentes</h2>
-                        <div id="alertasCartaoInteligentes">
+                        <div id="alertasCartãoInteligentes">
                             <div class="empty-state">Sem alertas no momento</div>
                         </div>
                     </div>
                     <div>
                         <h2>🗓️ Linha do Tempo de Parcelas</h2>
-                        <div id="timelineParcelasCartao">
+                        <div id="timelineParcelasCartão">
                             <div class="empty-state">Nenhuma compra parcelada registrada</div>
                         </div>
                     </div>
@@ -1272,6 +1868,31 @@
             <h2>9️⃣ Receita Média Histórica por Categoria</h2>
             <div id="compMediaHist"><div class="empty-state">Sem dados</div></div>
         </div>
+
+        <div class="card" style="margin-bottom:18px;">
+            <h2>10. Despesas do Mês - Resumo</h2>
+            <div id="compDespResumo"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px;">
+            <h2>11. Gastos por Categoria - Mês de Referência</h2>
+            <div id="compDespCatMesAtual"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px;">
+            <h2>12. Mês de Referência x Mês Anterior por Categoria</h2>
+            <div id="compDespCatMesXMes"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px;">
+            <h2>13. Detalhamento por Categoria</h2>
+            <div id="compDespDetalhamento"><div class="empty-state">Sem dados</div></div>
+        </div>
+
+        <div class="card" style="margin-bottom:18px;">
+            <h2>14. Receita x Despesa - Mês de Referência</h2>
+            <div id="compReceitaDespesaMes"><div class="empty-state">Sem dados</div></div>
+        </div>
     </section>
 </div>
 
@@ -1336,7 +1957,7 @@ const app = {
         this.listarReceitas('todas');
         this.listarDespesas('todas');
         this.listarMetas();
-        this.atualizarTudoCartao();
+        this.atualizarTudoCartão();
         // Init tetos
         const agora = new Date();
         const mesAtualStr = agora.toISOString().slice(0,7);
@@ -1360,9 +1981,9 @@ const app = {
             this.dados.tetos = parsed.tetos || [];
         }
         // Carregar módulo cartão
-        const dadosCartao = localStorage.getItem('cartaoApp');
-        if (dadosCartao) {
-            const parsed = JSON.parse(dadosCartao);
+        const dadosCartão = localStorage.getItem('cartaoApp');
+        if (dadosCartão) {
+            const parsed = JSON.parse(dadosCartão);
             this.dados.cartoes = parsed.cartoes || [];
             this.dados.compras = parsed.compras || [];
             this.dados.parcelas = parsed.parcelas || [];
@@ -1430,7 +2051,7 @@ const app = {
                 if (e.target.dataset.metasTab === 'tab-teto') app.renderTetoCards();
             });
         });
-        document.getElementById('formCartao').addEventListener('submit', e => this.adicionarCartao(e));
+        document.getElementById('formCartão').addEventListener('submit', e => this.adicionarCartão(e));
         document.getElementById('formCompra').addEventListener('submit', e => this.adicionarCompra(e));
 
         // Filtros receitas
@@ -1469,7 +2090,7 @@ const app = {
         document.getElementById(id).classList.add('active');
         btn.classList.add('active');
         if (id === 'relatorios') this.atualizarRelatorio();
-        if (id === 'cartoes') this.atualizarTudoCartao();
+        if (id === 'cartoes') this.atualizarTudoCartão();
         if (id === 'dashboard') this.atualizarDashboard();
         if (id === 'metas') { this.listarMetas(); this.renderTetoCards(); this.renderCentralAlertas(); }
         if (id === 'comparativos') this.renderComparativos();
@@ -1818,14 +2439,14 @@ const app = {
 
         container.innerHTML = ultimas.map(t => {
             const isReceita = t.tipo === 'receita';
-            const isCartao = t.tipo === 'cartao';
+            const isCartão = t.tipo === 'cartao';
             return `
-                <div class="list-item ${!isReceita && !isCartao ? 'expense' : ''} ${isCartao ? 'card-item' : ''}">
+                <div class="list-item ${!isReceita && !isCartão ? 'expense' : ''} ${isCartão ? 'card-item' : ''}">
                     <div class="list-item-content">
                         <div class="list-item-title">${t.descricao}</div>
-                        <div class="list-item-meta">${this.formatarData(t.data)}${isCartao ? ' • Cartão' : ''}</div>
+                        <div class="list-item-meta">${this.formatarData(t.data)}${isCartão ? ' • Cartão' : ''}</div>
                     </div>
-                    <div class="list-item-value ${isReceita ? 'income' : isCartao ? 'card-val' : 'expense'}">
+                    <div class="list-item-value ${isReceita ? 'income' : isCartão ? 'card-val' : 'expense'}">
                         ${isReceita ? '+' : '-'} R$ ${this.formatarMoeda(t.valor)}
                     </div>
                 </div>
@@ -1916,7 +2537,7 @@ const app = {
     },
 
     // ====================== CARTÕES ======================
-    adicionarCartao(e) {
+    adicionarCartão(e) {
         e.preventDefault();
         const diaFech = parseInt(document.getElementById('diaFechamento').value);
         const diaVenc = parseInt(document.getElementById('diaVencimento').value);
@@ -1926,9 +2547,9 @@ const app = {
         }
         const cartao = {
             id: Date.now(),
-            nome: document.getElementById('nomeCartao').value,
-            banco: document.getElementById('bancoCartao').value,
-            limiteTotal: parseFloat(document.getElementById('limiteCartao').value),
+            nome: document.getElementById('nomeCartão').value,
+            banco: document.getElementById('bancoCartão').value,
+            limiteTotal: parseFloat(document.getElementById('limiteCartão').value),
             diaFechamento: diaFech,
             diaVencimento: diaVenc,
             status: 'ativo'
@@ -1937,12 +2558,12 @@ const app = {
         this.salvarDados();
         this.mostrarSucesso('msgSuccessCard', '✓ Cartão adicionado com sucesso!');
         e.target.reset();
-        this.atualizarTudoCartao();
+        this.atualizarTudoCartão();
         this.atualizarDashboard();
     },
 
-    listarCartoes() {
-        const container = document.getElementById('listaCartoes');
+    listarCartões() {
+        const container = document.getElementById('listaCartões');
         if (this.dados.cartoes.length === 0) {
             container.innerHTML = '<div class="empty-state">Nenhum cartão cadastrado</div>';
             return;
@@ -1968,32 +2589,32 @@ const app = {
                         (Disponível: R$ ${this.formatarMoeda(disponivel)})
                     </div>
                     <div style="margin-top:8px;display:flex;gap:5px;">
-                        <button class="btn-warning btn-small" onclick="app.alternarStatusCartao(${c.id})">
+                        <button class="btn-warning btn-small" onclick="app.alternarStatusCartão(${c.id})">
                             ${c.status === 'ativo' ? 'Desativar' : 'Ativar'}
                         </button>
-                        <button class="btn-danger btn-small" onclick="app.deletarCartao(${c.id})">Deletar</button>
+                        <button class="btn-danger btn-small" onclick="app.deletarCartão(${c.id})">Deletar</button>
                     </div>
                 </div>
             `;
         }).join('');
     },
 
-    alternarStatusCartao(id) {
+    alternarStatusCartão(id) {
         const c = this.dados.cartoes.find(c => c.id === id);
         if (c) {
             c.status = c.status === 'ativo' ? 'inativo' : 'ativo';
             this.salvarDados();
-            this.listarCartoes();
+            this.listarCartões();
         }
     },
 
-    deletarCartao(id) {
+    deletarCartão(id) {
         if (confirm('Deletar este cartão? Todas as compras serão removidas.')) {
             this.dados.cartoes = this.dados.cartoes.filter(c => c.id !== id);
             this.dados.compras = this.dados.compras.filter(c => c.cardId !== id);
             this.dados.parcelas = this.dados.parcelas.filter(p => p.cardId !== id);
             this.salvarDados();
-            this.atualizarTudoCartao();
+            this.atualizarTudoCartão();
             this.atualizarDashboard();
         }
     },
@@ -2033,7 +2654,7 @@ const app = {
         this.verificarAlertasTeto();
         e.target.reset();
         this.setarDataAtual();
-        this.atualizarTudoCartao();
+        this.atualizarTudoCartão();
         this.atualizarDashboard();
     },
 
@@ -2120,7 +2741,7 @@ const app = {
                 compra.status = 'cancelada';
                 this.dados.parcelas = this.dados.parcelas.filter(p => p.compraId !== id);
                 this.salvarDados();
-                this.atualizarTudoCartao();
+                this.atualizarTudoCartão();
                 this.atualizarDashboard();
             }
         }
@@ -2230,12 +2851,12 @@ const app = {
     },
 
     atualizarAnalise() {
-        this.mostrarResumoCartoes();
-        this.mostrarGastosPorCategoriaCartao();
+        this.mostrarResumoCartões();
+        this.mostrarGastosPorCategoriaCartão();
     },
 
-    mostrarResumoCartoes() {
-        const container = document.getElementById('resumoCartoes');
+    mostrarResumoCartões() {
+        const container = document.getElementById('resumoCartões');
         if (this.dados.cartoes.length === 0) {
             container.innerHTML = '<div class="empty-state">Nenhum cartão cadastrado</div>';
             return;
@@ -2259,7 +2880,7 @@ const app = {
         }).join('');
     },
 
-    mostrarGastosPorCategoriaCartao() {
+    mostrarGastosPorCategoriaCartão() {
         const container = document.getElementById('gastosPorCategoria');
         const gastos = {};
         this.dados.compras.filter(c => c.status === 'ativa').forEach(c => {
@@ -2292,14 +2913,14 @@ const app = {
             .reduce((s, p) => s + p.valor, 0);
     },
 
-    atualizarTudoCartao() {
-        this.atualizarSelectCartoes();
-        this.listarCartoes();
+    atualizarTudoCartão() {
+        this.atualizarSelectCartões();
+        this.listarCartões();
         this.listarCompras();
         this.atualizarAnalise();
     },
 
-    atualizarSelectCartoes() {
+    atualizarSelectCartões() {
         const opt = '<option value="">Selecionar cartão...</option>' +
             this.dados.cartoes.map(c => `<option value="${c.id}">${c.nome}</option>`).join('');
         document.getElementById('cartaoCompra').innerHTML = opt;
@@ -2481,7 +3102,7 @@ const app = {
             .reduce((sum, d) => sum + d.valor, 0);
 
         // Parcelas de cartão do mês com a categoria (sem duplicatas)
-        const parcelasCartao = this.dados.parcelas
+        const parcelasCartão = this.dados.parcelas
             .filter(p => {
                 if (p.mes !== mes || p.ano !== ano || p.status === 'fechada') return false;
                 const compra = this.dados.compras.find(c => c.id === p.compraId);
@@ -2489,7 +3110,7 @@ const app = {
             })
             .reduce((sum, p) => sum + p.valor, 0);
 
-        return this.arredondarMoeda(despesasDiretas + parcelasCartao);
+        return this.arredondarMoeda(despesasDiretas + parcelasCartão);
     },
 
     // Retorna { totalGasto, percentual, restante, status } para um teto num mês
@@ -4925,7 +5546,7 @@ app.calcularParcelasFuturas = function(cartaoId = null, mesesVisao = 6) {
             label: data.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
             total: 0,
             parcelas: [],
-            porCartao: {}
+            porCartão: {}
         });
     }
 
@@ -4943,14 +5564,14 @@ app.calcularParcelasFuturas = function(cartaoId = null, mesesVisao = 6) {
             if (compra && compra.status === 'cancelada') return;
 
             const cartao = this.dados.cartoes.find(c => c.id === parcela.cardId);
-            const nomeCartao = cartao?.nome || 'Cartão';
+            const nomeCartão = cartao?.nome || 'Cartão';
             item.total += parcela.valor;
             item.parcelas.push({
                 ...parcela,
                 descricao: parcela.descricao || compra?.descricao || 'Compra',
-                cartaoNome: nomeCartao
+                cartaoNome: nomeCartão
             });
-            item.porCartao[nomeCartao] = (item.porCartao[nomeCartao] || 0) + parcela.valor;
+            item.porCartão[nomeCartão] = (item.porCartão[nomeCartão] || 0) + parcela.valor;
         });
 
     return linhaDoTempo.map(item => ({
@@ -4959,7 +5580,7 @@ app.calcularParcelasFuturas = function(cartaoId = null, mesesVisao = 6) {
     }));
 };
 
-app.obterContextoCicloCartao = function(cartao, referencia = new Date()) {
+app.obterContextoCicloCartão = function(cartao, referencia = new Date()) {
     const hoje = new Date(referencia.getFullYear(), referencia.getMonth(), referencia.getDate());
     let inicioCiclo;
     let fimCiclo;
@@ -4991,7 +5612,7 @@ app.calcularProjecaoFatura = function(cartaoId) {
     const cartao = this.dados.cartoes.find(c => String(c.id) === String(cartaoId));
     if (!cartao) return null;
 
-    const contexto = this.obterContextoCicloCartao(cartao);
+    const contexto = this.obterContextoCicloCartão(cartao);
     const parcelasFaturaAtual = (this.dados.parcelas || []).filter(parcela =>
         parcela.cardId === cartao.id &&
         parcela.mes === contexto.faturaMes &&
@@ -5011,10 +5632,10 @@ app.calcularProjecaoFatura = function(cartaoId) {
             return sum + (primeiraParcela ? primeiraParcela.valor : 0);
         }, 0);
 
-    const mediaDiariaGastoCartao = contexto.diasDecorridos > 0
+    const mediaDiariaGastoCartão = contexto.diasDecorridos > 0
         ? this.arredondarMoeda(impactoComprasNoCiclo / contexto.diasDecorridos)
         : 0;
-    const adicionalProjetado = this.arredondarMoeda(mediaDiariaGastoCartao * contexto.diasRestantes);
+    const adicionalProjetado = this.arredondarMoeda(mediaDiariaGastoCartão * contexto.diasRestantes);
     const valorProjetado = this.arredondarMoeda(totalAtualFatura + adicionalProjetado);
     const percentualLimiteProjetado = cartao.limiteTotal > 0
         ? (valorProjetado / cartao.limiteTotal) * 100
@@ -5024,7 +5645,7 @@ app.calcularProjecaoFatura = function(cartaoId) {
         cartao,
         contexto,
         totalAtualFatura: this.arredondarMoeda(totalAtualFatura),
-        mediaDiariaGastoCartao,
+        mediaDiariaGastoCartão,
         adicionalProjetado,
         valorProjetado,
         percentualLimiteProjetado,
@@ -5032,7 +5653,7 @@ app.calcularProjecaoFatura = function(cartaoId) {
     };
 };
 
-app.gerarAlertasCartao = function() {
+app.gerarAlertasCartão = function() {
     const alertas = [];
     const cartoesAtivos = (this.dados.cartoes || []).filter(cartao => cartao.status !== 'inativo');
 
@@ -5078,8 +5699,8 @@ app.gerarAlertasCartao = function() {
     return alertas;
 };
 
-app.renderProjecaoFaturaCartao = function() {
-    const container = document.getElementById('projecaoFaturaCartao');
+app.renderProjecaoFaturaCartão = function() {
+    const container = document.getElementById('projecaoFaturaCartão');
     if (!container) return;
 
     if (!this.dados.cartoes || this.dados.cartoes.length === 0) {
@@ -5118,7 +5739,7 @@ app.renderProjecaoFaturaCartao = function() {
                     Fatura em análise: ${competencia} • Fechamento dia ${cartao.diaFechamento} • ${badge}
                 </div>
                 <div class="goal-meta" style="margin-top:6px;">
-                    Total atual: R$ ${this.formatarMoeda(projecao.totalAtualFatura)} • Média diária do ciclo: R$ ${this.formatarMoeda(projecao.mediaDiariaGastoCartao)}
+                    Total atual: R$ ${this.formatarMoeda(projecao.totalAtualFatura)} • Média diária do ciclo: R$ ${this.formatarMoeda(projecao.mediaDiariaGastoCartão)}
                 </div>
                 <div class="goal-meta" style="margin-top:6px;font-weight:600;color:${statusColor};">
                     ${projecao.mensagem}
@@ -5128,8 +5749,8 @@ app.renderProjecaoFaturaCartao = function() {
     }).join('') || '<div class="empty-state">Nenhum cartão cadastrado</div>';
 };
 
-app.renderTimelineParcelasCartao = function() {
-    const container = document.getElementById('timelineParcelasCartao');
+app.renderTimelineParcelasCartão = function() {
+    const container = document.getElementById('timelineParcelasCartão');
     if (!container) return;
 
     const timeline = this.calcularParcelasFuturas(null, 6);
@@ -5141,7 +5762,7 @@ app.renderTimelineParcelasCartao = function() {
     }
 
     container.innerHTML = timeline.map(item => {
-        const breakdown = Object.entries(item.porCartao)
+        const breakdown = Object.entries(item.porCartão)
             .map(([nome, valor]) => `<span style="font-size:11px;color:var(--gray-500);">${nome}: R$ ${this.formatarMoeda(valor)}</span>`)
             .join(' • ');
 
@@ -5162,11 +5783,11 @@ app.renderTimelineParcelasCartao = function() {
     }).join('');
 };
 
-app.renderAlertasCartaoInteligentes = function() {
-    const container = document.getElementById('alertasCartaoInteligentes');
+app.renderAlertasCartãoInteligentes = function() {
+    const container = document.getElementById('alertasCartãoInteligentes');
     if (!container) return;
 
-    const alertas = this.gerarAlertasCartao();
+    const alertas = this.gerarAlertasCartão();
     if (alertas.length === 0) {
         container.innerHTML = '<div class="empty-state">Sem alertas no momento</div>';
         return;
@@ -5192,21 +5813,21 @@ app.renderAlertasCartaoInteligentes = function() {
     }).join('');
 };
 
-app.renderVisaoFuturaCartao = function() {
-    this.renderProjecaoFaturaCartao();
-    this.renderTimelineParcelasCartao();
-    this.renderAlertasCartaoInteligentes();
+app.renderVisaoFuturaCartão = function() {
+    this.renderProjecaoFaturaCartão();
+    this.renderTimelineParcelasCartão();
+    this.renderAlertasCartãoInteligentes();
 };
 
-const atualizarAnaliseCartaoAvancadaBase = app.atualizarAnalise.bind(app);
+const atualizarAnaliseCartãoAvancadaBase = app.atualizarAnalise.bind(app);
 app.atualizarAnalise = function() {
-    atualizarAnaliseCartaoAvancadaBase();
-    this.renderVisaoFuturaCartao();
+    atualizarAnaliseCartãoAvancadaBase();
+    this.renderVisaoFuturaCartão();
 };
 
-const atualizarTudoCartaoAvancadoBase = app.atualizarTudoCartao.bind(app);
-app.atualizarTudoCartao = function() {
-    atualizarTudoCartaoAvancadoBase();
+const atualizarTudoCartãoAvancadoBase = app.atualizarTudoCartão.bind(app);
+app.atualizarTudoCartão = function() {
+    atualizarTudoCartãoAvancadoBase();
     const campoMesFatura = document.getElementById('mesFatura');
     if (campoMesFatura && campoMesFatura.value) this.atualizarFaturas();
 };
@@ -5214,13 +5835,13 @@ app.atualizarTudoCartao = function() {
 const pagarFaturaAvancadoBase = app.pagarFatura.bind(app);
 app.pagarFatura = function(chave, cartaoId, mes, ano) {
     pagarFaturaAvancadoBase(chave, cartaoId, mes, ano);
-    this.atualizarTudoCartao();
+    this.atualizarTudoCartão();
 };
 
 const reabrirFaturaAvancadoBase = app.reabrirFatura.bind(app);
 app.reabrirFatura = function(chave) {
     reabrirFaturaAvancadoBase(chave);
-    this.atualizarTudoCartao();
+    this.atualizarTudoCartão();
 };
 </script>
 <script>
@@ -5470,20 +6091,1081 @@ app.atualizarUltimasTransacoes = function() {
 
     container.innerHTML = ultimas.map(transacao => {
         const isReceita = transacao.tipo === 'receita';
-        const isCartao = transacao.tipo === 'cartao';
+        const isCartão = transacao.tipo === 'cartao';
         return `
-            <div class="list-item ${!isReceita && !isCartao ? 'expense' : ''} ${isCartao ? 'card-item' : ''}">
+            <div class="list-item ${!isReceita && !isCartão ? 'expense' : ''} ${isCartão ? 'card-item' : ''}">
                 <div class="list-item-content">
                     <div class="list-item-title">${transacao.descricao}</div>
-                    <div class="list-item-meta">${this.formatarData(transacao.data)}${isCartao ? ' • Cartão' : ''}</div>
-                    ${!isCartao ? this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(transacao)) : ''}
+                    <div class="list-item-meta">${this.formatarData(transacao.data)}${isCartão ? ' • Cartão' : ''}</div>
+                    ${!isCartão ? this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(transacao)) : ''}
                 </div>
-                <div class="list-item-value ${isReceita ? 'income' : isCartao ? 'card-val' : 'expense'}">
+                <div class="list-item-value ${isReceita ? 'income' : isCartão ? 'card-val' : 'expense'}">
                     ${isReceita ? '+' : '-'} R$ ${this.formatarMoeda(transacao.valor)}
                 </div>
             </div>
         `;
     }).join('');
+};
+</script>
+<script>
+app.dashboardPeriodoSelecionado = app.dashboardPeriodoSelecionado || null;
+app._dashboardPeriodoFormatter = new Intl.DateTimeFormat('pt-BR', {
+    month: 'long',
+    year: 'numeric'
+});
+
+app.obterCompetenciaAtual = function() {
+    return new Date().toISOString().slice(0, 7);
+};
+
+app.normalizarCompetenciaValor = function(competencia) {
+    if (typeof competencia !== 'string') return '';
+    const valor = competencia.trim();
+    return /^\d{4}-\d{2}$/.test(valor) ? valor : '';
+};
+
+app.extrairCompetenciaData = function(data) {
+    if (typeof data === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(data)) {
+        return data.slice(0, 7);
+    }
+    return this.obterCompetenciaAtual();
+};
+
+app.obterCompetenciaRegistro = function(item) {
+    return this.normalizarCompetenciaValor(item?.competencia) || this.extrairCompetenciaData(item?.data);
+};
+
+app.obterDataCompetencia = function(competencia) {
+    const valor = this.normalizarCompetenciaValor(competencia) || this.obterCompetenciaAtual();
+    const [ano, mes] = valor.split('-').map(Number);
+    return new Date(ano, mes - 1, 1);
+};
+
+app.formatarCompetenciaDashboard = function(competencia) {
+    const label = this._dashboardPeriodoFormatter.format(this.obterDataCompetencia(competencia));
+    return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
+app.obterDashboardPeriodoSelecionado = function() {
+    if (!this.dashboardPeriodoSelecionado) {
+        this.dashboardPeriodoSelecionado = this.obterCompetenciaAtual();
+    }
+    return this.dashboardPeriodoSelecionado;
+};
+
+app.setDashboardPeriodoSelecionado = function(competencia) {
+    const normalizado = this.normalizarCompetenciaValor(competencia);
+    if (!normalizado) return;
+    this.dashboardPeriodoSelecionado = normalizado;
+    this.atualizarDashboard();
+};
+
+app.navegarDashboardMes = function(deslocamento) {
+    const data = this.obterDataCompetencia(this.obterDashboardPeriodoSelecionado());
+    data.setMonth(data.getMonth() + deslocamento);
+    const competencia = `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+    this.setDashboardPeriodoSelecionado(competencia);
+};
+
+app.normalizarCompetenciaLancamentos = function() {
+    let changed = false;
+
+    ['receitas', 'despesas'].forEach(chave => {
+        (this.dados[chave] || []).forEach(item => {
+            const competencia = this.extrairCompetenciaData(item.data);
+            if (item.competencia !== competencia) {
+                item.competencia = competencia;
+                changed = true;
+            }
+        });
+    });
+
+    return changed;
+};
+
+const carregarDadosPeriodoBase = app.carregarDados.bind(app);
+app.carregarDados = function() {
+    carregarDadosPeriodoBase();
+    this.dashboardPeriodoSelecionado = this.obterCompetenciaAtual();
+
+    if (this.normalizarCompetenciaLancamentos()) {
+        this.salvarDados();
+    }
+};
+
+const salvarDadosPeriodoBase = app.salvarDados.bind(app);
+app.salvarDados = function() {
+    this.normalizarCompetenciaLancamentos();
+    salvarDadosPeriodoBase();
+};
+
+const criarReceitaComCompetenciaBase = app.criarReceita.bind(app);
+app.criarReceita = function() {
+    const receita = criarReceitaComCompetenciaBase();
+    return {
+        ...receita,
+        competencia: this.extrairCompetenciaData(receita.data)
+    };
+};
+
+const atualizarReceitaComCompetenciaBase = app.atualizarReceita.bind(app);
+app.atualizarReceita = function(id, dadosAtualizados) {
+    return atualizarReceitaComCompetenciaBase(id, {
+        ...dadosAtualizados,
+        competencia: this.extrairCompetenciaData(dadosAtualizados?.data)
+    });
+};
+
+app.updateReceita = function(id, dadosAtualizados) {
+    return this.atualizarReceita(id, dadosAtualizados);
+};
+
+const criarDespesaComCompetenciaBase = app.criarDespesa.bind(app);
+app.criarDespesa = function() {
+    const despesa = criarDespesaComCompetenciaBase();
+    return {
+        ...despesa,
+        competencia: this.extrairCompetenciaData(despesa.data)
+    };
+};
+
+const atualizarDespesaComCompetenciaBase = app.atualizarDespesa.bind(app);
+app.atualizarDespesa = function(id, dadosAtualizados) {
+    return atualizarDespesaComCompetenciaBase(id, {
+        ...dadosAtualizados,
+        competencia: this.extrairCompetenciaData(dadosAtualizados?.data)
+    });
+};
+
+app.obterReceitasDoPeriodoDashboard = function(competencia, opcoes = {}) {
+    const somenteRecebidas = opcoes.somenteRecebidas !== false;
+    const diaFinal = Number.isFinite(opcoes.diaFinal) ? opcoes.diaFinal : null;
+
+    return (this.dados.receitas || []).filter(receita => {
+        if (this.obterCompetenciaRegistro(receita) !== competencia) return false;
+        if (somenteRecebidas && receita.status !== 'recebido') return false;
+        if (diaFinal === null) return true;
+
+        const dia = parseInt(String(receita.data || '').slice(8, 10), 10);
+        return !Number.isNaN(dia) && dia <= diaFinal;
+    });
+};
+
+app.obterDespesasDoPeriodoDashboard = function(competencia, opcoes = {}) {
+    const diaFinal = Number.isFinite(opcoes.diaFinal) ? opcoes.diaFinal : null;
+
+    return (this.dados.despesas || []).filter(despesa => {
+        if (this.obterCompetenciaRegistro(despesa) !== competencia) return false;
+        if (diaFinal === null) return true;
+
+        const dia = parseInt(String(despesa.data || '').slice(8, 10), 10);
+        return !Number.isNaN(dia) && dia <= diaFinal;
+    });
+};
+
+app.obterParcelasDoPeriodoDashboard = function(competencia) {
+    const data = this.obterDataCompetencia(competencia);
+    const mes = data.getMonth();
+    const ano = data.getFullYear();
+
+    return (this.dados.parcelas || []).filter(parcela => parcela.mes === mes && parcela.ano === ano);
+};
+
+app.calcularTotaisDashboard = function(competencia) {
+    const totalReceitas = this.obterReceitasDoPeriodoDashboard(competencia)
+        .reduce((sum, receita) => sum + (parseFloat(receita.valor) || 0), 0);
+    const totalDespesas = this.obterDespesasDoPeriodoDashboard(competencia)
+        .reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+
+    return {
+        receitas: Math.round(totalReceitas * 100) / 100,
+        despesas: Math.round(totalDespesas * 100) / 100,
+        saldo: Math.round((totalReceitas - totalDespesas) * 100) / 100
+    };
+};
+
+app.obterMapaMensalAnoDashboard = function(ano) {
+    const mapa = {};
+    const garantirMes = competencia => {
+        if (!mapa[competencia]) {
+            mapa[competencia] = { competencia, receitas: 0, despesas: 0, saldo: 0 };
+        }
+        return mapa[competencia];
+    };
+
+    (this.dados.receitas || []).forEach(receita => {
+        const competencia = this.obterCompetenciaRegistro(receita);
+        if (!competencia.startsWith(`${ano}-`) || receita.status !== 'recebido') return;
+        garantirMes(competencia).receitas += parseFloat(receita.valor) || 0;
+    });
+
+    (this.dados.despesas || []).forEach(despesa => {
+        const competencia = this.obterCompetenciaRegistro(despesa);
+        if (!competencia.startsWith(`${ano}-`)) return;
+        garantirMes(competencia).despesas += parseFloat(despesa.valor) || 0;
+    });
+
+    return Object.values(mapa)
+        .map(item => ({
+            ...item,
+            receitas: Math.round(item.receitas * 100) / 100,
+            despesas: Math.round(item.despesas * 100) / 100,
+            saldo: Math.round((item.receitas - item.despesas) * 100) / 100
+        }))
+        .sort((a, b) => a.competencia.localeCompare(b.competencia));
+};
+
+app.calcularMediaAnoDashboard = function(competencia) {
+    const [ano] = competencia.split('-').map(Number);
+    const meses = this.obterMapaMensalAnoDashboard(ano);
+    if (meses.length === 0) return null;
+
+    const totais = meses.reduce((acc, item) => {
+        acc.receitas += item.receitas;
+        acc.despesas += item.despesas;
+        acc.saldo += item.saldo;
+        return acc;
+    }, { receitas: 0, despesas: 0, saldo: 0 });
+
+    return {
+        mesesBase: meses.length,
+        receitas: Math.round((totais.receitas / meses.length) * 100) / 100,
+        despesas: Math.round((totais.despesas / meses.length) * 100) / 100,
+        saldo: Math.round((totais.saldo / meses.length) * 100) / 100
+    };
+};
+
+app.resumirVariacaoDashboard = function(valorAtual, valorBase, chave) {
+    const diff = Math.round((valorAtual - valorBase) * 100) / 100;
+    const trend = Math.abs(diff) < 0.01 ? 'estabilidade' : diff > 0 ? 'alta' : 'queda';
+    const melhorou = trend === 'estabilidade'
+        ? null
+        : chave === 'despesas'
+            ? diff < 0
+            : diff > 0;
+
+    return {
+        diff,
+        trend,
+        cor: trend === 'estabilidade'
+            ? 'var(--gray-500)'
+            : melhorou
+                ? 'var(--success)'
+                : 'var(--danger)'
+    };
+};
+
+app.calcularComparativosDashboard = function(competencia) {
+    const dataAtual = this.obterDataCompetencia(competencia);
+    const competenciaAnterior = (() => {
+        const data = new Date(dataAtual);
+        data.setMonth(data.getMonth() - 1);
+        return `${data.getFullYear()}-${String(data.getMonth() + 1).padStart(2, '0')}`;
+    })();
+
+    const atual = this.calcularTotaisDashboard(competencia);
+    const anterior = this.calcularTotaisDashboard(competenciaAnterior);
+    const mediaAno = this.calcularMediaAnoDashboard(competencia);
+
+    return {
+        competenciaAtual: competencia,
+        competenciaAnterior,
+        atual,
+        anterior,
+        mediaAno,
+        mensal: {
+            receitas: this.resumirVariacaoDashboard(atual.receitas, anterior.receitas, 'receitas'),
+            despesas: this.resumirVariacaoDashboard(atual.despesas, anterior.despesas, 'despesas'),
+            saldo: this.resumirVariacaoDashboard(atual.saldo, anterior.saldo, 'saldo')
+        },
+        media: mediaAno ? {
+            receitas: this.resumirVariacaoDashboard(atual.receitas, mediaAno.receitas, 'receitas'),
+            despesas: this.resumirVariacaoDashboard(atual.despesas, mediaAno.despesas, 'despesas'),
+            saldo: this.resumirVariacaoDashboard(atual.saldo, mediaAno.saldo, 'saldo')
+        } : null
+    };
+};
+
+app.renderizarLinhasComparativoDashboard = function(baseValores, variacoes) {
+    const metricas = [
+        { chave: 'receitas', label: 'Receitas' },
+        { chave: 'despesas', label: 'Despesas' },
+        { chave: 'saldo', label: 'Saldo' }
+    ];
+
+    return metricas.map(metrica => {
+        const base = baseValores[metrica.chave];
+        const variacao = variacoes[metrica.chave];
+        const prefixo = variacao.diff > 0 ? '+' : variacao.diff < 0 ? '-' : '';
+
+        return `
+            <div style="display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-top:1px solid var(--gray-200);">
+                <div style="font-size:12px;color:var(--gray-700);">${metrica.label}</div>
+                <div style="text-align:right;">
+                    <div style="font-size:12px;color:var(--gray-500);">Base: R$ ${this.formatarMoeda(base)}</div>
+                    <div style="font-size:12px;font-weight:700;color:${variacao.cor};">${prefixo}R$ ${this.formatarMoeda(Math.abs(variacao.diff))} • ${variacao.trend}</div>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+app.renderizarComparativosDashboard = function(competencia) {
+    const container = document.getElementById('dashboardComparativos');
+    if (!container) return;
+
+    const comparativos = this.calcularComparativosDashboard(competencia);
+    const tituloMensal = this.formatarCompetenciaDashboard(comparativos.competenciaAnterior);
+    const mediaAno = comparativos.mediaAno;
+    const [ano] = competencia.split('-');
+
+    container.innerHTML = `
+        <div style="border:1px solid var(--gray-200);border-radius:12px;padding:12px;background:var(--gray-50);">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--gray-500);margin-bottom:8px;">Mês atual x mês anterior</div>
+            <div style="font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:4px;">Base: ${tituloMensal}</div>
+            ${this.renderizarLinhasComparativoDashboard(comparativos.anterior, comparativos.mensal)}
+        </div>
+        <div style="border:1px solid var(--gray-200);border-radius:12px;padding:12px;background:var(--gray-50);">
+            <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--gray-500);margin-bottom:8px;">Mês atual x média mensal do ano</div>
+            <div style="font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:4px;">${mediaAno ? `${mediaAno.mesesBase} ${mediaAno.mesesBase === 1 ? 'mês na base' : 'meses na base'} em ${ano}` : `Sem média disponível em ${ano}`}</div>
+            ${mediaAno
+                ? this.renderizarLinhasComparativoDashboard(mediaAno, comparativos.media)
+                : '<div style="font-size:12px;color:var(--gray-500);padding-top:8px;border-top:1px solid var(--gray-200);">A média aparece automaticamente quando houver histórico no ano selecionado.</div>'}
+        </div>
+    `;
+};
+
+app.atualizarCabecalhoDashboardPeriodo = function(competencia) {
+    const labelEl = document.getElementById('dashboardPeriodoLabel');
+    const resumoEl = document.getElementById('dashboardPeriodoResumo');
+
+    if (labelEl) {
+        labelEl.textContent = this.formatarCompetenciaDashboard(competencia);
+    }
+
+    if (resumoEl) {
+        resumoEl.textContent = `Exibindo somente os lançamentos de ${this.formatarCompetenciaDashboard(competencia).toLowerCase()}.`;
+    }
+};
+
+app.obterContextoPeriodo = function(competencia) {
+    const atual = this.obterCompetenciaAtual();
+    if (competencia === atual) return 'atual';
+    return competencia < atual ? 'passado' : 'futuro';
+};
+
+app.calcularMediaDiariaReceita = function(competencia = this.obterDashboardPeriodoSelecionado()) {
+    const contexto = this.obterContextoPeriodo(competencia);
+    const data = this.obterDataCompetencia(competencia);
+    const diasNoMes = new Date(data.getFullYear(), data.getMonth() + 1, 0).getDate();
+    const hoje = new Date();
+    const diasPassados = contexto === 'atual' ? hoje.getDate() : contexto === 'passado' ? diasNoMes : 0;
+
+    const totalReceitasAteHoje = this.obterReceitasDoPeriodoDashboard(competencia, {
+        diaFinal: diasPassados > 0 ? diasPassados : null
+    }).reduce((sum, receita) => sum + (parseFloat(receita.valor) || 0), 0);
+
+    return {
+        totalReceitasAteHoje: Math.round(totalReceitasAteHoje * 100) / 100,
+        diasPassados,
+        mediaDiariaReceita: diasPassados > 0 ? Math.round((totalReceitasAteHoje / diasPassados) * 100) / 100 : 0
+    };
+};
+
+app.calcularMediaDiariaDespesa = function(competencia = this.obterDashboardPeriodoSelecionado()) {
+    const contexto = this.obterContextoPeriodo(competencia);
+    const data = this.obterDataCompetencia(competencia);
+    const diasNoMes = new Date(data.getFullYear(), data.getMonth() + 1, 0).getDate();
+    const hoje = new Date();
+    const diasPassados = contexto === 'atual' ? hoje.getDate() : contexto === 'passado' ? diasNoMes : 0;
+
+    const totalDespesasAteHoje = this.obterDespesasDoPeriodoDashboard(competencia, {
+        diaFinal: diasPassados > 0 ? diasPassados : null
+    }).reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+
+    return {
+        totalDespesasAteHoje: Math.round(totalDespesasAteHoje * 100) / 100,
+        diasPassados,
+        mediaDiariaDespesa: diasPassados > 0 ? Math.round((totalDespesasAteHoje / diasPassados) * 100) / 100 : 0
+    };
+};
+
+app.calcularProjecaoMensal = function(competencia = this.obterDashboardPeriodoSelecionado()) {
+    const contexto = this.obterContextoPeriodo(competencia);
+    const data = this.obterDataCompetencia(competencia);
+    const diasNoMes = new Date(data.getFullYear(), data.getMonth() + 1, 0).getDate();
+    const receitaInfo = this.calcularMediaDiariaReceita(competencia);
+    const despesaInfo = this.calcularMediaDiariaDespesa(competencia);
+    const receitaProjetada = Math.round((receitaInfo.mediaDiariaReceita * diasNoMes) * 100) / 100;
+    const despesaProjetada = Math.round((despesaInfo.mediaDiariaDespesa * diasNoMes) * 100) / 100;
+    const saldoProjetado = Math.round((receitaProjetada - despesaProjetada) * 100) / 100;
+    const temMovimentacao = receitaInfo.totalReceitasAteHoje > 0 || despesaInfo.totalDespesasAteHoje > 0;
+
+    let confianca = this.determinarNivelConfianca(receitaInfo.diasPassados || despesaInfo.diasPassados || 0);
+    if (contexto === 'passado') {
+        confianca = {
+            nivel: 'fechado',
+            label: 'Mês fechado',
+            descricao: 'Valores consolidados do período',
+            bg: 'rgba(255,255,255,0.18)'
+        };
+    }
+
+    return {
+        competencia,
+        contexto,
+        diasPassados: receitaInfo.diasPassados || despesaInfo.diasPassados || 0,
+        diasNoMes,
+        receitaProjetada,
+        despesaProjetada,
+        saldoProjetado,
+        totalReceitasAteHoje: receitaInfo.totalReceitasAteHoje,
+        totalDespesasAteHoje: despesaInfo.totalDespesasAteHoje,
+        mediaDiariaReceita: receitaInfo.mediaDiariaReceita,
+        mediaDiariaDespesa: despesaInfo.mediaDiariaDespesa,
+        confianca,
+        temMovimentacao,
+        mensagemReceita: `Mantendo o ritmo atual, sua receita do mês será ~R$ ${this.formatarMoeda(receitaProjetada)}`,
+        mensagemDespesa: `Seus gastos projetados para o mês são ~R$ ${this.formatarMoeda(despesaProjetada)}`,
+        mensagemSaldo: `Saldo final estimado: R$ ${this.formatarMoeda(saldoProjetado)}`
+    };
+};
+
+app.atualizarCardProjecao = function() {
+    const resumoEl = document.getElementById('projecaoResumo');
+    const confiancaEl = document.getElementById('projecaoConfianca');
+    const receitaEl = document.getElementById('receitaProjetada');
+    const despesaEl = document.getElementById('despesaProjetada');
+    const saldoEl = document.getElementById('saldoProjetado');
+    const auxiliarEl = document.getElementById('projecaoAuxiliar');
+    const cardEl = document.getElementById('cardProjecaoMensal');
+
+    if (!resumoEl || !confiancaEl || !receitaEl || !despesaEl || !saldoEl || !auxiliarEl || !cardEl) return;
+
+    const competencia = this.obterDashboardPeriodoSelecionado();
+    const periodoLabel = this.formatarCompetenciaDashboard(competencia).toLowerCase();
+    const projecao = this.calcularProjecaoMensal(competencia);
+
+    if (!projecao.temMovimentacao) {
+        receitaEl.textContent = 'R$ 0,00';
+        despesaEl.textContent = 'R$ 0,00';
+        saldoEl.textContent = 'R$ 0,00';
+        confiancaEl.textContent = projecao.contexto === 'futuro' ? 'Sem dados' : 'Movimentação insuficiente';
+        confiancaEl.style.background = 'rgba(255,255,255,0.18)';
+        resumoEl.textContent = `A projeção de ${periodoLabel} será exibida após a movimentação do período.`;
+        auxiliarEl.textContent = 'Os valores são recalculados automaticamente a partir do mês selecionado.';
+        cardEl.style.opacity = '1';
+        return;
+    }
+
+    receitaEl.textContent = `R$ ${this.formatarMoeda(projecao.receitaProjetada)}`;
+    despesaEl.textContent = `R$ ${this.formatarMoeda(projecao.despesaProjetada)}`;
+    saldoEl.textContent = `R$ ${this.formatarMoeda(projecao.saldoProjetado)}`;
+    confiancaEl.textContent = projecao.confianca.label;
+    confiancaEl.style.background = projecao.confianca.bg;
+    resumoEl.textContent = projecao.contexto === 'passado'
+        ? `Mês encerrado com receita de R$ ${this.formatarMoeda(projecao.receitaProjetada)} e despesas de R$ ${this.formatarMoeda(projecao.despesaProjetada)}.`
+        : projecao.mensagemSaldo;
+    auxiliarEl.textContent = projecao.contexto === 'passado'
+        ? 'Os valores acima representam o fechamento consolidado do período selecionado.'
+        : projecao.confianca.descricao;
+    cardEl.style.opacity = '1';
+};
+
+app.atualizarDashboard = function() {
+    const competencia = this.obterDashboardPeriodoSelecionado();
+    const dataPeriodo = this.obterDataCompetencia(competencia);
+    const totais = this.calcularTotaisDashboard(competencia);
+
+    this.atualizarCabecalhoDashboardPeriodo(competencia);
+    this.renderizarComparativosDashboard(competencia);
+
+    document.getElementById('totalReceitas').textContent = 'R$ ' + this.formatarMoeda(totais.receitas);
+    document.getElementById('totalDespesas').textContent = 'R$ ' + this.formatarMoeda(totais.despesas);
+    document.getElementById('saldo').textContent = 'R$ ' + this.formatarMoeda(totais.saldo);
+
+    const cardSaldo = document.getElementById('saldo').parentElement;
+    cardSaldo.style.background = totais.saldo < 0
+        ? 'linear-gradient(135deg, #f56565 0%, #e53e3e 100%)'
+        : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)';
+
+    const faturaMes = this.calcularFaturaDoMes(dataPeriodo.getMonth(), dataPeriodo.getFullYear());
+    document.getElementById('totalFaturaAtual').textContent = 'R$ ' + this.formatarMoeda(faturaMes);
+
+    const limiteTotal = this.dados.cartoes.reduce((sum, cartao) => sum + (cartao.limiteTotal || 0), 0);
+    document.getElementById('limiteDisponivel').textContent = 'R$ ' + this.formatarMoeda(limiteTotal - faturaMes);
+
+    this.atualizarUltimasTransacoes();
+    this.atualizarChartCategorias();
+    this.atualizarMetasResume();
+    this.atualizarCardProjecao();
+    if (document.getElementById('tab-teto') && document.getElementById('tab-teto').classList.contains('active')) {
+        this.renderTetoCards();
+    }
+};
+
+app.atualizarUltimasTransacoes = function() {
+    const container = document.getElementById('ultimasTransacoes');
+    if (!container) return;
+
+    const competencia = this.obterDashboardPeriodoSelecionado();
+    const dataPeriodo = this.obterDataCompetencia(competencia);
+    const mes = dataPeriodo.getMonth();
+    const ano = dataPeriodo.getFullYear();
+
+    const parcelasDoMes = this.obterParcelasDoPeriodoDashboard(competencia).map(parcela => {
+        const compra = this.dados.compras.find(item => item.id === parcela.compraId);
+        const cartao = this.dados.cartoes.find(item => item.id === parcela.cardId);
+        return {
+            tipo: 'cartao',
+            data: compra?.dataCompra || `${ano}-${String(mes + 1).padStart(2, '0')}-01`,
+            descricao: `${compra?.descricao || 'Compra'} (${cartao?.nome || 'Cartão'} ${parcela.numero}/${parcela.totalParcelas})`,
+            valor: parcela.valor,
+            descricaoDetalhada: ''
+        };
+    });
+
+    const transacoes = [
+        ...this.dados.receitas
+            .filter(receita => this.obterCompetenciaRegistro(receita) === competencia)
+            .map(receita => ({ ...receita, tipo: 'receita', descricaoDetalhada: this.obterDescricaoDetalhada(receita) })),
+        ...this.dados.despesas
+            .filter(despesa => this.obterCompetenciaRegistro(despesa) === competencia)
+            .map(despesa => ({ ...despesa, tipo: 'despesa', descricaoDetalhada: this.obterDescricaoDetalhada(despesa) })),
+        ...parcelasDoMes
+    ];
+
+    transacoes.sort((a, b) => new Date(b.data) - new Date(a.data));
+    const ultimas = transacoes.slice(0, 6);
+
+    if (ultimas.length === 0) {
+        container.innerHTML = '<div class="empty-state">Nenhuma transação registrada</div>';
+        return;
+    }
+
+    container.innerHTML = ultimas.map(transacao => {
+        const isReceita = transacao.tipo === 'receita';
+        const isCartão = transacao.tipo === 'cartao';
+        return `
+            <div class="list-item ${!isReceita && !isCartão ? 'expense' : ''} ${isCartão ? 'card-item' : ''}">
+                <div class="list-item-content">
+                    <div class="list-item-title">${transacao.descricao}</div>
+                    <div class="list-item-meta">${this.formatarData(transacao.data)}${isCartão ? ' • Cartão' : ''}</div>
+                    ${!isCartão ? this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(transacao)) : ''}
+                </div>
+                <div class="list-item-value ${isReceita ? 'income' : isCartão ? 'card-val' : 'expense'}">
+                    ${isReceita ? '+' : '-'} R$ ${this.formatarMoeda(transacao.valor)}
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+app.atualizarChartCategorias = function() {
+    const container = document.getElementById('chartCategorias');
+    if (!container) return;
+
+    const competencia = this.obterDashboardPeriodoSelecionado();
+    const categorias = {};
+
+    this.obterDespesasDoPeriodoDashboard(competencia).forEach(despesa => {
+        categorias[despesa.categoria] = (categorias[despesa.categoria] || 0) + (parseFloat(despesa.valor) || 0);
+    });
+
+    const entries = Object.entries(categorias).sort((a, b) => b[1] - a[1]);
+    if (entries.length === 0) {
+        container.innerHTML = '<div class="empty-state">Sem dados para exibir</div>';
+        return;
+    }
+
+    const total = entries.reduce((sum, [, valor]) => sum + valor, 0) || 1;
+    container.innerHTML = entries.map(([categoria, valor]) => {
+        const percentual = Math.round((valor / total) * 100);
+        return `
+            <div style="margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:6px;">
+                    <div style="font-size:13px;color:var(--gray-700);">${this._resolveEmoji(categoria)} ${categoria}</div>
+                    <div style="font-size:13px;font-weight:700;color:var(--gray-700);">R$ ${this.formatarMoeda(valor)}</div>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${percentual}%;"></div>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+</script>
+<script>
+app._mesesVisaoAnual = ['Jan', 'Fev', 'Mar', 'Abr', 'Mai', 'Jun', 'Jul', 'Ago', 'Set', 'Out', 'Nov', 'Dez'];
+
+app.obterVisaoAnualAnoSelecionado = function() {
+    if (!Number.isInteger(this.visaoAnualAnoSelecionado)) {
+        this.visaoAnualAnoSelecionado = new Date().getFullYear();
+    }
+    return this.visaoAnualAnoSelecionado;
+};
+
+app.setVisaoAnualAnoSelecionado = function(ano) {
+    const numero = parseInt(ano, 10);
+    if (!Number.isInteger(numero)) return;
+    this.visaoAnualAnoSelecionado = numero;
+    this.renderVisaoAnual();
+};
+
+app.navegarVisaoAnual = function(deslocamento) {
+    this.setVisaoAnualAnoSelecionado(this.obterVisaoAnualAnoSelecionado() + deslocamento);
+};
+
+app.calcularResumoVisaoAnual = function(ano = this.obterVisaoAnualAnoSelecionado()) {
+    const meses = Array.from({ length: 12 }, (_, index) => {
+        const competencia = `${ano}-${String(index + 1).padStart(2, '0')}`;
+        const receitas = this.obterReceitasDoPeriodoDashboard(competencia)
+            .reduce((sum, receita) => sum + (parseFloat(receita.valor) || 0), 0);
+        const despesas = this.obterDespesasDoPeriodoDashboard(competencia)
+            .reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+        const saldo = receitas - despesas;
+
+        return {
+            mes: index,
+            label: this._mesesVisaoAnual[index],
+            competencia,
+            receitas: Math.round(receitas * 100) / 100,
+            despesas: Math.round(despesas * 100) / 100,
+            saldo: Math.round(saldo * 100) / 100
+        };
+    });
+
+    const mesesExistentes = meses.filter(item => item.receitas > 0 || item.despesas > 0);
+    const totais = meses.reduce((acc, item) => {
+        acc.receitas += item.receitas;
+        acc.despesas += item.despesas;
+        acc.saldo += item.saldo;
+        return acc;
+    }, { receitas: 0, despesas: 0, saldo: 0 });
+
+    const divisorMedia = mesesExistentes.length || 0;
+    const melhorMesReceita = mesesExistentes.reduce((melhor, item) => {
+        if (!melhor || item.receitas > melhor.receitas) return item;
+        return melhor;
+    }, null);
+    const maiorMesGasto = mesesExistentes.reduce((maior, item) => {
+        if (!maior || item.despesas > maior.despesas) return item;
+        return maior;
+    }, null);
+
+    return {
+        ano,
+        meses,
+        mesesExistentes,
+        totalReceitas: Math.round(totais.receitas * 100) / 100,
+        totalDespesas: Math.round(totais.despesas * 100) / 100,
+        saldo: Math.round(totais.saldo * 100) / 100,
+        mediaReceitas: divisorMedia > 0 ? Math.round((totais.receitas / divisorMedia) * 100) / 100 : 0,
+        mediaDespesas: divisorMedia > 0 ? Math.round((totais.despesas / divisorMedia) * 100) / 100 : 0,
+        melhorMesReceita,
+        maiorMesGasto
+    };
+};
+
+app.renderVisaoAnual = function() {
+    const ano = this.obterVisaoAnualAnoSelecionado();
+    const resumo = this.calcularResumoVisaoAnual(ano);
+
+    const anoLabel = document.getElementById('visaoAnualAnoLabel');
+    const resumoEl = document.getElementById('visaoAnualResumo');
+    const totalReceitasEl = document.getElementById('visaoAnualTotalReceitas');
+    const totalDespesasEl = document.getElementById('visaoAnualTotalDespesas');
+    const saldoEl = document.getElementById('visaoAnualSaldo');
+    const mediaReceitasEl = document.getElementById('visaoAnualMediaReceitas');
+    const mediaDespesasEl = document.getElementById('visaoAnualMediaDespesas');
+    const melhorReceitaEl = document.getElementById('visaoAnualMelhorReceita');
+    const melhorReceitaMetaEl = document.getElementById('visaoAnualMelhorReceitaMeta');
+    const maiorGastoEl = document.getElementById('visaoAnualMaiorGasto');
+    const maiorGastoMetaEl = document.getElementById('visaoAnualMaiorGastoMeta');
+    const evolucaoEl = document.getElementById('visaoAnualEvolucao');
+
+    if (!anoLabel || !resumoEl || !totalReceitasEl || !totalDespesasEl || !saldoEl || !mediaReceitasEl || !mediaDespesasEl || !melhorReceitaEl || !melhorReceitaMetaEl || !maiorGastoEl || !maiorGastoMetaEl || !evolucaoEl) {
+        return;
+    }
+
+    anoLabel.textContent = String(ano);
+    resumoEl.textContent = resumo.mesesExistentes.length > 0
+        ? `Base anual com ${resumo.mesesExistentes.length} ${resumo.mesesExistentes.length === 1 ? 'mês com movimentação' : 'meses com movimentação'}.`
+        : 'Nenhuma movimentação registrada neste ano.';
+
+    totalReceitasEl.textContent = `R$ ${this.formatarMoeda(resumo.totalReceitas)}`;
+    totalDespesasEl.textContent = `R$ ${this.formatarMoeda(resumo.totalDespesas)}`;
+    saldoEl.textContent = `R$ ${this.formatarMoeda(resumo.saldo)}`;
+    mediaReceitasEl.textContent = `R$ ${this.formatarMoeda(resumo.mediaReceitas)}`;
+    mediaDespesasEl.textContent = `R$ ${this.formatarMoeda(resumo.mediaDespesas)}`;
+
+    melhorReceitaEl.textContent = resumo.melhorMesReceita ? resumo.melhorMesReceita.label : '--';
+    melhorReceitaMetaEl.textContent = resumo.melhorMesReceita
+        ? `Receitas de R$ ${this.formatarMoeda(resumo.melhorMesReceita.receitas)}`
+        : 'Sem receitas registradas';
+
+    maiorGastoEl.textContent = resumo.maiorMesGasto ? resumo.maiorMesGasto.label : '--';
+    maiorGastoMetaEl.textContent = resumo.maiorMesGasto
+        ? `Despesas de R$ ${this.formatarMoeda(resumo.maiorMesGasto.despesas)}`
+        : 'Sem despesas registradas';
+
+    if (resumo.mesesExistentes.length === 0) {
+        evolucaoEl.innerHTML = '<div class=\"empty-state\">Sem dados para exibir</div>';
+        return;
+    }
+
+    const maxReceita = Math.max(...resumo.meses.map(item => item.receitas), 1);
+    const maxDespesa = Math.max(...resumo.meses.map(item => item.despesas), 1);
+
+    evolucaoEl.innerHTML = resumo.meses.map(item => {
+        const receitaPct = Math.max((item.receitas / maxReceita) * 100, item.receitas > 0 ? 6 : 0);
+        const despesaPct = Math.max((item.despesas / maxDespesa) * 100, item.despesas > 0 ? 6 : 0);
+        const saldoCor = item.saldo < 0 ? 'var(--danger)' : 'var(--success)';
+
+        return `
+            <div style="border:1px solid var(--gray-200);border-radius:12px;padding:12px;margin-bottom:12px;background:${item.receitas === 0 && item.despesas === 0 ? 'var(--gray-50)' : '#fff'};">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap;margin-bottom:10px;">
+                    <div style="font-weight:700;color:var(--gray-800);">${item.label}</div>
+                    <div style="font-size:12px;color:${saldoCor};font-weight:700;">Saldo: R$ ${this.formatarMoeda(item.saldo)}</div>
+                </div>
+                <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+                    <div>
+                        <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--gray-600);margin-bottom:6px;">
+                            <span>Receitas</span>
+                            <strong style="color:var(--success);">R$ ${this.formatarMoeda(item.receitas)}</strong>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:${receitaPct}%;background:linear-gradient(90deg,#16a34a,#22c55e);"></div></div>
+                    </div>
+                    <div>
+                        <div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;color:var(--gray-600);margin-bottom:6px;">
+                            <span>Despesas</span>
+                            <strong style="color:var(--danger);">R$ ${this.formatarMoeda(item.despesas)}</strong>
+                        </div>
+                        <div class="progress-bar"><div class="progress-fill" style="width:${despesaPct}%;background:linear-gradient(90deg,#f97316,#ef4444);"></div></div>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+};
+
+const mudarSecaoVisaoAnualBase = app.mudarSecao.bind(app);
+app.mudarSecao = function(id, btn) {
+    mudarSecaoVisaoAnualBase(id, btn);
+    if (id === 'visao-anual') this.renderVisaoAnual();
+};
+
+const renderizarDependenciasReceitaVisaoAnualBase = app.renderizarDependenciasReceita.bind(app);
+app.renderizarDependenciasReceita = function() {
+    renderizarDependenciasReceitaVisaoAnualBase();
+    this.renderVisaoAnual();
+};
+
+const renderizarDependenciasDespesaVisaoAnualBase = app.renderizarDependenciasDespesa.bind(app);
+app.renderizarDependenciasDespesa = function() {
+    renderizarDependenciasDespesaVisaoAnualBase();
+    this.renderVisaoAnual();
+};
+</script>
+<script>
+app.obterPeriodoComparativoSelecionado = function() {
+    const el = document.getElementById('mesComparativo');
+    const hoje = new Date();
+    let mes = hoje.getMonth();
+    let ano = hoje.getFullYear();
+
+    if (el && el.value) {
+        const [anoStr, mesStr] = el.value.split('-');
+        ano = parseInt(anoStr, 10);
+        mes = parseInt(mesStr, 10) - 1;
+    }
+
+    let mesPrev = mes - 1;
+    let anoPrev = ano;
+    if (mesPrev < 0) {
+        mesPrev = 11;
+        anoPrev--;
+    }
+
+    return {
+        mes,
+        ano,
+        mesPrev,
+        anoPrev,
+        competenciaAtual: `${ano}-${String(mes + 1).padStart(2, '0')}`,
+        competenciaAnterior: `${anoPrev}-${String(mesPrev + 1).padStart(2, '0')}`,
+        labelAtual: new Date(ano, mes, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' }),
+        labelAnterior: new Date(anoPrev, mesPrev, 1).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })
+    };
+};
+
+app._somaDespesaCatMes = function(cat, mes, ano) {
+    const competencia = `${ano}-${String(mes + 1).padStart(2, '0')}`;
+    return (this.dados.despesas || [])
+        .filter(despesa => this.obterCompetenciaRegistro(despesa) === competencia && despesa.categoria === cat)
+        .reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+};
+
+app._categoriasDespesaComparativo = function(periodo) {
+    const ids = new Set((this._getCatsDespesa() || []).map(cat => cat.id));
+
+    (this.dados.despesas || []).forEach(despesa => {
+        const competencia = this.obterCompetenciaRegistro(despesa);
+        if (competencia === periodo.competenciaAtual || competencia === periodo.competenciaAnterior) {
+            ids.add(despesa.categoria);
+        }
+    });
+
+    return [...ids];
+};
+
+app.renderComparativosDespesas = function() {
+    const periodo = this.obterPeriodoComparativoSelecionado();
+    const cats = this._categoriasDespesaComparativo(periodo);
+    const label = categoria => {
+        const cat = this._getCatDespesaById(categoria);
+        return cat ? cat.nome : categoria;
+    };
+    const emoji = categoria => {
+        const cat = this._getCatDespesaById(categoria);
+        return cat && cat.emoji ? cat.emoji : '📦';
+    };
+    const fmt = valor => this.formatarMoeda(valor);
+
+    const dadosAtual = cats.map(cat => ({ cat, valor: this._somaDespesaCatMes(cat, periodo.mes, periodo.ano) }));
+    const dadosPrev = cats.map(cat => ({ cat, valor: this._somaDespesaCatMes(cat, periodo.mesPrev, periodo.anoPrev) }));
+    const totalAtual = dadosAtual.reduce((sum, item) => sum + item.valor, 0);
+    const totalPrev = dadosPrev.reduce((sum, item) => sum + item.valor, 0);
+    const ranked = [...dadosAtual].sort((a, b) => b.valor - a.valor);
+    const maxValor = ranked[0]?.valor || 0;
+
+    const resumoEl = document.getElementById('compDespResumo');
+    const categoriasEl = document.getElementById('compDespCatMesAtual');
+    const comparativoEl = document.getElementById('compDespCatMesXMes');
+    const detalheEl = document.getElementById('compDespDetalhamento');
+
+    if (!resumoEl || !categoriasEl || !comparativoEl || !detalheEl) return;
+
+    const diffTotal = Math.round((totalAtual - totalPrev) * 100) / 100;
+    const tendenciaTotal = Math.abs(diffTotal) < 0.01 ? 'estabilidade' : diffTotal > 0 ? 'aumento' : 'redução';
+    const corTendencia = tendenciaTotal === 'estabilidade'
+        ? 'var(--gray-500)'
+        : diffTotal > 0
+            ? 'var(--danger)'
+            : 'var(--success)';
+
+    resumoEl.innerHTML = `
+        <div class="summary" style="grid-template-columns:repeat(2,minmax(0,1fr));margin-bottom:0;">
+            <div class="summary-card expense" style="text-align:left;">
+                <h3>Total gasto</h3>
+                <div class="value">R$ ${fmt(totalAtual)}</div>
+                <div style="font-size:12px;opacity:0.9;margin-top:8px;">Período: ${periodo.labelAtual}</div>
+            </div>
+            <div class="summary-card" style="text-align:left;">
+                <h3>Comparação com o mês anterior</h3>
+                <div class="value">${diffTotal >= 0 ? '+' : '-'}R$ ${fmt(Math.abs(diffTotal))}</div>
+                <div style="font-size:12px;opacity:0.92;margin-top:8px;color:${corTendencia};font-weight:700;">${tendenciaTotal}</div>
+                <div style="font-size:12px;opacity:0.86;margin-top:4px;color:var(--gray-500);">Base: ${periodo.labelAnterior}</div>
+            </div>
+        </div>
+    `;
+
+    if (totalAtual === 0 && dadosAtual.every(item => item.valor === 0)) {
+        categoriasEl.innerHTML = `<div class="empty-state">Sem despesas registradas em ${periodo.labelAtual}</div>`;
+    } else {
+        categoriasEl.innerHTML = `
+            <div style="margin-bottom:12px;font-size:13px;color:var(--gray-500);">
+                Total gasto em <strong style="color:var(--gray-900);">${periodo.labelAtual}</strong>:
+                <strong style="color:var(--danger);">R$ ${fmt(totalAtual)}</strong>
+            </div>
+            <div class="comp-cat-grid">
+                ${ranked.map(item => {
+                    const pct = totalAtual > 0 ? (item.valor / totalAtual) * 100 : 0;
+                    const barPct = maxValor > 0 ? (item.valor / maxValor) * 100 : 0;
+                    return `
+                        <div class="comp-cat-card">
+                            <div class="comp-cat-name">${emoji(item.cat)} ${label(item.cat)}</div>
+                            <div class="comp-cat-value">R$ ${fmt(item.valor)}</div>
+                            <div class="comp-cat-pct">${pct.toFixed(1)}% do total do mês</div>
+                            <div class="comp-cat-bar"><div class="comp-cat-bar-fill" style="width:${barPct.toFixed(1)}%;background:linear-gradient(90deg,#f97316,#ef4444);"></div></div>
+                        </div>
+                    `;
+                }).join('')}
+            </div>
+        `;
+    }
+
+    const rows = cats.map(cat => {
+        const atual = dadosAtual.find(item => item.cat === cat)?.valor || 0;
+        const prev = dadosPrev.find(item => item.cat === cat)?.valor || 0;
+        const diff = atual - prev;
+        const tendencia = Math.abs(diff) < 0.01 ? 'estabilidade' : diff > 0 ? 'aumento' : 'redução';
+        const cls = Math.abs(diff) < 0.01 ? 'comp-diff-zero' : diff > 0 ? 'comp-diff-neg' : 'comp-diff-pos';
+        const indicador = Math.abs(diff) < 0.01 ? '➡️' : diff > 0 ? '📈' : '📉';
+        return { cat, atual, prev, diff, tendencia, cls, indicador };
+    });
+
+    comparativoEl.innerHTML = `
+        <div style="overflow-x:auto;">
+            <table class="comp-table">
+                <thead>
+                    <tr>
+                        <th>Categoria</th>
+                        <th>${periodo.labelAtual}</th>
+                        <th>${periodo.labelAnterior}</th>
+                        <th>Diferença (R$)</th>
+                        <th>Tendência</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${rows.map(row => `
+                        <tr>
+                            <td><strong>${emoji(row.cat)} ${label(row.cat)}</strong></td>
+                            <td>R$ ${fmt(row.atual)}</td>
+                            <td>R$ ${fmt(row.prev)}</td>
+                            <td class="${row.cls}">${row.diff >= 0 ? '+' : '-'}R$ ${fmt(Math.abs(row.diff))}</td>
+                            <td class="${row.cls}">${row.tendencia}</td>
+                            <td class="comp-indicator">${row.indicador}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </div>
+    `;
+
+    const despesasMes = (this.dados.despesas || [])
+        .filter(despesa => this.obterCompetenciaRegistro(despesa) === periodo.competenciaAtual)
+        .sort((a, b) => {
+            if (a.categoria !== b.categoria) return a.categoria.localeCompare(b.categoria);
+            return new Date(b.data) - new Date(a.data);
+        });
+
+    if (despesasMes.length === 0) {
+        detalheEl.innerHTML = `<div class="empty-state">Sem despesas registradas em ${periodo.labelAtual}</div>`;
+        return;
+    }
+
+    const grupos = despesasMes.reduce((acc, despesa) => {
+        if (!acc[despesa.categoria]) acc[despesa.categoria] = [];
+        acc[despesa.categoria].push(despesa);
+        return acc;
+    }, {});
+
+    detalheEl.innerHTML = Object.entries(grupos).map(([categoria, itens]) => {
+        const totalCategoria = itens.reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+        const percentual = totalAtual > 0 ? (totalCategoria / totalAtual) * 100 : 0;
+        return `
+            <div style="border:1px solid var(--gray-200);border-radius:12px;padding:14px;margin-bottom:14px;">
+                <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;margin-bottom:10px;">
+                    <div>
+                        <div style="font-weight:700;color:var(--gray-800);">${emoji(categoria)} ${label(categoria)}</div>
+                        <div style="font-size:12px;color:var(--gray-500);">${percentual.toFixed(1)}% do total do mês</div>
+                    </div>
+                    <div style="font-size:13px;font-weight:700;color:var(--danger);">R$ ${fmt(totalCategoria)}</div>
+                </div>
+                ${itens.map(despesa => `
+                    <div class="list-item expense" style="margin-bottom:8px;">
+                        <div class="list-item-content">
+                            <div class="list-item-title">${despesa.descricao}</div>
+                            <div class="list-item-meta">${this.formatarData(despesa.data)} • ${despesa.tipo}</div>
+                            ${this.renderDescricaoDetalhada(this.obterDescricaoDetalhada(despesa))}
+                        </div>
+                        <div class="list-item-value expense">- R$ ${fmt(despesa.valor)}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }).join('');
+};
+
+app.renderComparativoReceitaDespesa = function() {
+    const periodo = this.obterPeriodoComparativoSelecionado();
+    const container = document.getElementById('compReceitaDespesaMes');
+    if (!container) return;
+
+    const receitasAtual = this.obterReceitasDoPeriodoDashboard(periodo.competenciaAtual)
+        .reduce((sum, receita) => sum + (parseFloat(receita.valor) || 0), 0);
+    const despesasAtual = this.obterDespesasDoPeriodoDashboard(periodo.competenciaAtual)
+        .reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+    const receitasPrev = this.obterReceitasDoPeriodoDashboard(periodo.competenciaAnterior)
+        .reduce((sum, receita) => sum + (parseFloat(receita.valor) || 0), 0);
+    const despesasPrev = this.obterDespesasDoPeriodoDashboard(periodo.competenciaAnterior)
+        .reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+
+    const comprometimentoAtual = receitasAtual > 0 ? (despesasAtual / receitasAtual) * 100 : null;
+    const comprometimentoPrev = receitasPrev > 0 ? (despesasPrev / receitasPrev) * 100 : null;
+    const restanteAtual = receitasAtual - despesasAtual;
+    const diffComprometimento = comprometimentoAtual !== null && comprometimentoPrev !== null
+        ? comprometimentoAtual - comprometimentoPrev
+        : null;
+
+    let classificacao = 'Situação estável';
+    let classe = 'equal';
+    if (diffComprometimento !== null) {
+        if (diffComprometimento < -0.5) {
+            classificacao = 'Situação melhorou';
+            classe = 'below';
+        } else if (diffComprometimento > 0.5) {
+            classificacao = 'Situação piorou';
+            classe = 'above';
+        }
+    }
+
+    const fraseComprometimento = comprometimentoAtual === null
+        ? 'Sem receita recebida no mês selecionado para medir o comprometimento.'
+        : `Você utilizou ${comprometimentoAtual.toFixed(1)}% da sua renda neste mês${diffComprometimento === null ? '.' : ` (${diffComprometimento >= 0 ? '+' : ''}${diffComprometimento.toFixed(1)}% em relação ao mês anterior).`}`;
+
+    container.innerHTML = `
+        <div style="background:var(--primary-light);border-radius:12px;padding:14px 16px;margin-bottom:14px;font-size:13px;color:var(--primary-dark);">
+            ${fraseComprometimento}
+        </div>
+        <div class="summary" style="grid-template-columns:repeat(3,minmax(0,1fr));margin-bottom:14px;">
+            <div class="summary-card">
+                <h3>% da receita comprometida</h3>
+                <div class="value">${comprometimentoAtual === null ? '--' : `${comprometimentoAtual.toFixed(1)}%`}</div>
+            </div>
+            <div class="summary-card balance">
+                <h3>Valor líquido restante</h3>
+                <div class="value">R$ ${this.formatarMoeda(restanteAtual)}</div>
+            </div>
+            <div class="summary-card">
+                <h3>Classificação</h3>
+                <div class="value" style="font-size:24px;">${classificacao}</div>
+            </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;">
+            <div style="border:1px solid var(--gray-200);border-radius:12px;padding:12px;background:var(--gray-50);">
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--gray-500);margin-bottom:8px;">Mês selecionado</div>
+                <div style="font-size:13px;color:var(--gray-700);">Receitas: <strong>R$ ${this.formatarMoeda(receitasAtual)}</strong></div>
+                <div style="font-size:13px;color:var(--gray-700);margin-top:4px;">Despesas: <strong>R$ ${this.formatarMoeda(despesasAtual)}</strong></div>
+            </div>
+            <div style="border:1px solid var(--gray-200);border-radius:12px;padding:12px;background:var(--gray-50);">
+                <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:var(--gray-500);margin-bottom:8px;">Comparação com o mês anterior</div>
+                <div style="font-size:13px;color:var(--gray-700);">Comprometimento anterior: <strong>${comprometimentoPrev === null ? '--' : `${comprometimentoPrev.toFixed(1)}%`}</strong></div>
+                <div class="media-badge ${classe}" style="margin-top:8px;display:inline-flex;">${classificacao}</div>
+            </div>
+        </div>
+    `;
+};
+
+const renderComparativosReceitaBase = app.renderComparativos.bind(app);
+app.renderComparativos = function() {
+    renderComparativosReceitaBase();
+    this.renderComparativosDespesas();
+    this.renderComparativoReceitaDespesa();
+};
+
+const renderDependenciasReceitaComparativosBase = app.renderizarDependenciasReceita.bind(app);
+app.renderizarDependenciasReceita = function() {
+    renderDependenciasReceitaComparativosBase();
+    if (typeof this.renderComparativos === 'function') this.renderComparativos();
+};
+
+const renderDependenciasDespesaComparativosBase = app.renderizarDependenciasDespesa.bind(app);
+app.renderizarDependenciasDespesa = function() {
+    renderDependenciasDespesaComparativosBase();
+    if (typeof this.renderComparativos === 'function') this.renderComparativos();
 };
 </script>
 <script>
