@@ -628,6 +628,33 @@
                     </div>
                 </div>
 
+                <div class="summary" style="grid-template-columns: 1fr; margin-top: 18px;">
+                    <div class="summary-card" id="cardProjecaoMensal" style="background:linear-gradient(135deg,#0f766e 0%,#0ea5a3 100%); text-align:left;">
+                        <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap;">
+                            <div>
+                                <h3 style="margin-bottom:6px;">💸 Projeção do Mês</h3>
+                                <div id="projecaoResumo" style="font-size:12px;opacity:0.95;line-height:1.5;">💸 A projeção será exibida após alguns dias de movimentação</div>
+                            </div>
+                            <div id="projecaoConfianca" style="font-size:11px;padding:4px 10px;border-radius:999px;background:rgba(255,255,255,0.18);color:#fff;white-space:nowrap;">Sem dados</div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px;">
+                            <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;">
+                                <div style="font-size:11px;opacity:0.9;">Receita projetada</div>
+                                <div id="receitaProjetada" style="font-size:18px;font-weight:700;margin-top:4px;">R$ 0,00</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;">
+                                <div style="font-size:11px;opacity:0.9;">Despesa projetada</div>
+                                <div id="despesaProjetada" style="font-size:18px;font-weight:700;margin-top:4px;">R$ 0,00</div>
+                            </div>
+                            <div style="background:rgba(255,255,255,0.12);border-radius:10px;padding:10px;">
+                                <div style="font-size:11px;opacity:0.9;">Saldo estimado</div>
+                                <div id="saldoProjetado" style="font-size:18px;font-weight:700;margin-top:4px;">R$ 0,00</div>
+                            </div>
+                        </div>
+                        <div id="projecaoAuxiliar" style="font-size:11px;opacity:0.92;margin-top:12px;">Os valores são recalculados automaticamente com base no ritmo atual do mês.</div>
+                    </div>
+                </div>
+
                 <h2 style="margin-top:22px;">📈 Últimas Transações</h2>
                 <div class="list-container" id="ultimasTransacoes">
                     <div class="empty-state">Nenhuma transação registrada</div>
@@ -4623,6 +4650,148 @@ app.atualizarMetasResume = function() {
             </div>
         `;
     }).join('');
+};
+</script>
+<script>
+app.determinarNivelConfianca = function(diasPassados) {
+    if (diasPassados < 7) {
+        return {
+            nivel: 'baixa',
+            label: 'Confiança baixa',
+            descricao: 'Projeção inicial — poucos dados disponíveis',
+            bg: 'rgba(255,255,255,0.18)'
+        };
+    }
+
+    if (diasPassados <= 14) {
+        return {
+            nivel: 'media',
+            label: 'Confiança média',
+            descricao: 'Projeção moderada',
+            bg: 'rgba(251,191,36,0.28)'
+        };
+    }
+
+    return {
+        nivel: 'alta',
+        label: 'Confiança alta',
+        descricao: 'Projeção confiável com base no histórico do mês',
+        bg: 'rgba(34,197,94,0.26)'
+    };
+};
+
+app.calcularMediaDiariaReceita = function() {
+    const hoje = new Date();
+    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59, 999);
+    const diasPassados = hoje.getDate();
+
+    const totalReceitasAteHoje = this.dados.receitas
+        .filter(receita => {
+            if (receita.status !== 'recebido') return false;
+            const data = new Date(`${receita.data}T00:00:00`);
+            return data >= inicioMes && data <= fimHoje;
+        })
+        .reduce((sum, receita) => sum + (parseFloat(receita.valor) || 0), 0);
+
+    return {
+        totalReceitasAteHoje: this.arredondarMetaValor ? this.arredondarMetaValor(totalReceitasAteHoje) : Math.round(totalReceitasAteHoje * 100) / 100,
+        diasPassados,
+        mediaDiariaReceita: diasPassados > 0 ? Math.round((totalReceitasAteHoje / diasPassados) * 100) / 100 : 0
+    };
+};
+
+app.calcularMediaDiariaDespesa = function() {
+    const hoje = new Date();
+    const inicioMes = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+    const fimHoje = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59, 999);
+    const diasPassados = hoje.getDate();
+
+    const totalDespesasAteHoje = this.dados.despesas
+        .filter(despesa => {
+            const data = new Date(`${despesa.data}T00:00:00`);
+            return data >= inicioMes && data <= fimHoje;
+        })
+        .reduce((sum, despesa) => sum + (parseFloat(despesa.valor) || 0), 0);
+
+    return {
+        totalDespesasAteHoje: this.arredondarMetaValor ? this.arredondarMetaValor(totalDespesasAteHoje) : Math.round(totalDespesasAteHoje * 100) / 100,
+        diasPassados,
+        mediaDiariaDespesa: diasPassados > 0 ? Math.round((totalDespesasAteHoje / diasPassados) * 100) / 100 : 0
+    };
+};
+
+app.calcularProjecaoMensal = function() {
+    const hoje = new Date();
+    const diasPassados = hoje.getDate();
+    const diasNoMes = new Date(hoje.getFullYear(), hoje.getMonth() + 1, 0).getDate();
+    const receitaInfo = this.calcularMediaDiariaReceita();
+    const despesaInfo = this.calcularMediaDiariaDespesa();
+    const receitaProjetada = Math.round(receitaInfo.mediaDiariaReceita * diasNoMes * 100) / 100;
+    const despesaProjetada = Math.round(despesaInfo.mediaDiariaDespesa * diasNoMes * 100) / 100;
+    const saldoProjetado = Math.round((receitaProjetada - despesaProjetada) * 100) / 100;
+    const confianca = this.determinarNivelConfianca(diasPassados);
+    const temMovimentacao = receitaInfo.totalReceitasAteHoje > 0 || despesaInfo.totalDespesasAteHoje > 0;
+
+    return {
+        diasPassados,
+        diasNoMes,
+        receitaProjetada,
+        despesaProjetada,
+        saldoProjetado,
+        totalReceitasAteHoje: receitaInfo.totalReceitasAteHoje,
+        totalDespesasAteHoje: despesaInfo.totalDespesasAteHoje,
+        mediaDiariaReceita: receitaInfo.mediaDiariaReceita,
+        mediaDiariaDespesa: despesaInfo.mediaDiariaDespesa,
+        confianca,
+        temMovimentacao,
+        mensagemReceita: `💸 Mantendo o ritmo atual, sua receita do mês será ~R$ ${this.formatarMoeda(receitaProjetada)}`,
+        mensagemDespesa: `💸 Seus gastos projetados para o mês são ~R$ ${this.formatarMoeda(despesaProjetada)}`,
+        mensagemSaldo: `💸 Saldo final estimado: R$ ${this.formatarMoeda(saldoProjetado)}`
+    };
+};
+
+app.atualizarCardProjecao = function() {
+    const resumoEl = document.getElementById('projecaoResumo');
+    const confiancaEl = document.getElementById('projecaoConfianca');
+    const receitaEl = document.getElementById('receitaProjetada');
+    const despesaEl = document.getElementById('despesaProjetada');
+    const saldoEl = document.getElementById('saldoProjetado');
+    const auxiliarEl = document.getElementById('projecaoAuxiliar');
+    const cardEl = document.getElementById('cardProjecaoMensal');
+
+    if (!resumoEl || !confiancaEl || !receitaEl || !despesaEl || !saldoEl || !auxiliarEl || !cardEl) return;
+
+    const projecao = this.calcularProjecaoMensal();
+
+    if (!projecao.temMovimentacao) {
+        receitaEl.textContent = 'R$ 0,00';
+        despesaEl.textContent = 'R$ 0,00';
+        saldoEl.textContent = 'R$ 0,00';
+        resumoEl.textContent = '💸 A projeção será exibida após alguns dias de movimentação';
+        confiancaEl.textContent = 'Sem dados';
+        confiancaEl.style.background = 'rgba(255,255,255,0.18)';
+        auxiliarEl.textContent = 'Assim que houver receitas ou despesas no mês atual, o app passa a estimar automaticamente o fechamento do mês.';
+        cardEl.style.background = 'linear-gradient(135deg,#0f766e 0%,#0ea5a3 100%)';
+        return;
+    }
+
+    receitaEl.textContent = `R$ ${this.formatarMoeda(projecao.receitaProjetada)}`;
+    despesaEl.textContent = `R$ ${this.formatarMoeda(projecao.despesaProjetada)}`;
+    saldoEl.textContent = `R$ ${this.formatarMoeda(projecao.saldoProjetado)}`;
+    resumoEl.textContent = projecao.mensagemSaldo;
+    confiancaEl.textContent = projecao.confianca.label;
+    confiancaEl.style.background = projecao.confianca.bg;
+    auxiliarEl.textContent = `${projecao.confianca.descricao} • ${projecao.mensagemReceita} • ${projecao.mensagemDespesa}`;
+    cardEl.style.background = projecao.saldoProjetado < 0
+        ? 'linear-gradient(135deg,#b91c1c 0%,#ef4444 100%)'
+        : 'linear-gradient(135deg,#0f766e 0%,#0ea5a3 100%)';
+};
+
+const atualizarDashboardComProjecao = app.atualizarDashboard.bind(app);
+app.atualizarDashboard = function() {
+    atualizarDashboardComProjecao();
+    this.atualizarCardProjecao();
 };
 </script>
 </body>
